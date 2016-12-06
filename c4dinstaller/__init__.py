@@ -137,7 +137,6 @@ class FeaturesPage(_FormPage('page03features')):
   def initForm(self):
     self.label.setText(self.ls('features.label'))
     self.initButtonBox('targetPage')
-    print(self.config('features'))
     for ident, name in self.config('features').items():
       is_main_feature = ident.startswith('!')
       if is_main_feature:
@@ -302,6 +301,7 @@ class Installer(ui.form('installer')):
     return value
 
   def cancel(self):
+    print("info: called Installer.cancel()")
     self.endPage.canceled = True
     self.setCurrentPage(self.endPage)
 
@@ -310,6 +310,7 @@ class Installer(ui.form('installer')):
       page = self.currentPage
     if save:
       self.currentPage = page
+    print("info: switching to page:", page.objectName())
     self.stackedPages.setCurrentWidget(page)
     page.becomesVisible.emit()
 
