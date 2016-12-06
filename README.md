@@ -4,6 +4,8 @@ This repository provides a customizable installer for Cinema 4D plugins based
 on CPython 3, PyInstaller and PyQt5. It is licensed under GPL to abide the
 PyQt5 license requirements.
 
+![Installer Screenshots](http://i.imgur.com/O2sHbqn.jpg)
+
 ## Requirements
 
 - CPython 3.3 or 3.4 (3.5 not supported by PyInstaller)
@@ -31,7 +33,9 @@ PyQt5 license requirements.
 
 ## Configuration
 
-*Todo: Instructions on how to configure the installer with `config.json`*
+*Todo*
+
+The installer is configured using the [`config.json`](config.json) file.
 
 ## Testing
 
