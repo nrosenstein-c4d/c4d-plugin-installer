@@ -162,7 +162,14 @@ class InstallPage(_FormPage('page05install')):
 
   def initForm(self):
     self.initButtonBox('endPage')
+    sp = self.textView.sizePolicy()
+    sp.setRetainSizeWhenHidden(True)
+    self.textView.setSizePolicy(sp)
+    self.buttonDetails.clicked.connect(self.on_detailsClicked)
     self.becomesVisible.connect(self.on_becomesVisible)
+
+  def on_detailsClicked(self):
+    self.textView.setVisible(not self.textView.isVisible())
 
   def on_becomesVisible(self):
     #self.label.setText(self.config('text.pages.install.collecting'))

@@ -31,7 +31,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="toggleDetails">
+      <widget class="QPushButton" name="buttonDetails">
        <property name="text">
         <string>Details</string>
        </property>
@@ -41,6 +41,9 @@
    </item>
    <item>
     <widget class="QPlainTextEdit" name="textView">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="readOnly">
       <bool>true</bool>
      </property>
@@ -56,7 +59,7 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>toggleDetails</tabstop>
+  <tabstop>buttonDetails</tabstop>
   <tabstop>textView</tabstop>
  </tabstops>
  <resources/>
