@@ -38,13 +38,13 @@ with open('config.json') as fp:
 is_mac = sys.platform.startswith('darwin')
 
 installer_name = config['name']
-installer_icon = config['icon'] if not is_mac else config['bundle_icon']
+installer_icon = "data/image/icon.ico" if not is_mac else "data/image/icon.icns"
 block_cipher = None
 
 a = Analysis(['bootstrapper.py'],
   pathex = [os.getcwd()],
   binaries = None,
-  datas = [('config.json', '.')] + recursive_data_files('data', 'data'),
+  datas = recursive_data_files('data', 'data'),
   hiddenimports = ['c4dinstaller.ui.' + x[:-3] for x in os.listdir('c4dinstaller/ui')],
   hookspath = [],
   runtime_hooks = [],

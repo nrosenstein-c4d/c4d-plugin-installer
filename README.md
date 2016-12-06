@@ -37,14 +37,56 @@ Todolist:
 
 ## Configuration & Customization
 
-*Todo*
+The main configuration file is [data/config.json](data/config.json). There
+you need to specify the following information:
 
-The installer is configured using the [`config.json`](config.json) file. The
-[`data/`](data) directory contains the banner and icon images as well as the
-EULA and About text.
+- Basic installer info, like the generated executable/bundle name and the
+  OSX bundle identifier.
+- Features that will be displayed in the "Features" page of the installer.
+  Note that if no features are configured, the page will not be displayed.
 
-> Note: You should not change the About text. It is mandatory to include the
-> licenses of all used software.
+The strings that are displayed in the dialog are defined in
+[data/strings/en.json]. In every string you can use variables in the format
+`$varname` or `${varname}`. These variables are defined in the `"__vars__"`
+section of the same string file.
+
+Note that these variables are also supported in the `"features"` object
+in [data/config.json]. The demo configuration contains the following feature
+declaration:
+
+```json
+  "features": {
+    "!plugin": "$plugin",
+    "docs": "$documentation",
+    "presets": "$presets"
+  }
+```
+
+On the left side you can see the identifiers. These identifiers are used
+in the `"install"` section. On the right side are the names of the features
+that are displayed in the installer. In the example above, they reference
+variables in the string file. The `!` prefix makes the feature always enabled
+and prevents the user from turning it of (used for the "main" feature that
+is always required).
+
+The EULA can be in [data/eula.txt] and should be updated before building the
+installer. If you don't want to display an EULA, you can delete the file
+entirely.
+
+*Todo: describe `"install"` section*
+
+To summarise, these are the steps to configure the installer:
+
+1. Change the installer and bundle name in [data/config.json]
+2. Add or remove features from the `"features"` section in [data/config.json]
+3. Add the files to be installed to `data/install` and update the `"install"`
+   section in [data/config.json]
+4. Update the strings in [data/strings/en.json]
+5. Test and build the installer
+
+[data/config.json]: data/config.json
+[data/eula.txt]: data/config.json
+[data/strings/en.json]: data/strings/en.json
 
 ## Testing
 

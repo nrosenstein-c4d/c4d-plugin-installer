@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import *
 
 import collections
 import json
+import string
 import sys
 import os
 
@@ -36,6 +37,9 @@ class _PageBase(object):
   def config(self, name):
     return self.installer.config(name)
 
+  def ls(self, name=None, subst=None):
+    return self.installer.ls(name, subst)
+
   def initButtonBox(self, nextPage=None):
     self.buttonOk = self.buttonBox.button(QDialogButtonBox.Ok)
     self.buttonCancel = self.buttonBox.button(QDialogButtonBox.Cancel)
@@ -43,12 +47,14 @@ class _PageBase(object):
     self.nextPageName = nextPage
 
     if self.buttonOk:
-      self.buttonOk.setText("Next")
+      self.buttonOk.setText(self.ls('button.next'))
     if self.buttonOk and nextPage:
       self.buttonOk.clicked.connect(self.nextPage)
     if self.buttonCancel:
+      self.buttonCancel.setText(self.ls('button.cancel'))
       self.buttonCancel.clicked.connect(lambda: self.installer.cancel())
     if self.buttonClose:
+      self.buttonClose.setText(self.ls('button.close'))
       self.buttonClose.clicked.connect(lambda: self.installer.close())
 
   def nextPage(self):
@@ -70,7 +76,7 @@ def _FormPage(form_name):
 class AboutPage(_FormPage('page00about')):
 
   def initForm(self):
-    self.label.setText(self.config('text.pages.about'))
+    self.label.setText(self.ls('about.label'))
     self.textView.setWordWrapMode(QTextOption.NoWrap)
     self.buttonBack.clicked.connect(lambda: self.installer.setCurrentPage())
     self.becomesVisible.connect(self.on_becomesVisible)
@@ -88,7 +94,7 @@ class AboutPage(_FormPage('page00about')):
 class WelcomePage(_FormPage('page01welcome')):
 
   def initForm(self):
-    self.label.setText(self.config('text.pages.welcome'))
+    self.label.setText(self.ls('welcome.label'))
     self.initButtonBox('eulaPage')
     self.buttonAbout.clicked.connect(lambda: self.installer.setCurrentPage(self.installer.aboutPage, False))
 
@@ -96,18 +102,23 @@ class WelcomePage(_FormPage('page01welcome')):
 class EulaPage(_FormPage('page02eula')):
 
   def initForm(self):
-    self.label.setText(self.config('text.pages.eula'))
+    self.label.setText(self.ls('eula.label'))
     self.initButtonBox('featuresPage')
     self.radioButtonGroup.buttonClicked.connect(self.on_radioButtonClicked)
+    self.becomesVisible.connect(self.on_becomesVisible)
     self.on_radioButtonClicked()
 
-    # Read the contents of the EULA.
-    try:
-      with open('data/eula.txt') as fp:
-        content = fp.read()
-    except Exception as exc:
-      content = 'Error: ' + str(exc)
-    self.textView.setPlainText(content)
+  def on_becomesVisible(self):
+    filename = 'data/eula.txt'
+    if not os.path.isfile(filename):
+      self.nextPage()
+    else:
+      try:
+        with open(filename) as fp:
+          content = fp.read()
+      except Exception as exc:
+        content = 'Error: ' + str(exc)
+      self.textView.setPlainText(content)
 
   def on_radioButtonClicked(self):
     agreed = self.radioButtonGroup.checkedButton() == self.radioAgree
@@ -116,20 +127,27 @@ class EulaPage(_FormPage('page02eula')):
 
 class FeaturesPage(_FormPage('page03features')):
 
+  class Feature(QListWidgetItem):
+    def __init__(self, ident, text, parent=None):
+      super().__init__(text)
+      self._ident = ident
+    def ident(self):
+      return self._ident
+
   def initForm(self):
-    self.label.setText(self.config('text.pages.features'))
+    self.label.setText(self.ls('features.label'))
     self.initButtonBox('targetPage')
-    for feature in self.config('features'):
-      is_main_feature = feature.startswith('@')
+    print(self.config('features'))
+    for ident, name in self.config('features').items():
+      is_main_feature = ident.startswith('!')
       if is_main_feature:
-        feature = feature[1:]
-      enabled = not is_main_feature
+        ident = ident[1:]
 
       flags = Qt.ItemIsUserCheckable
-      if enabled:
+      if not is_main_feature:
         flags |= Qt.ItemIsEnabled
 
-      item = QListWidgetItem(feature)
+      item = self.Feature(ident, self.ls(subst=name))
       item.setFlags(flags)
       item.setCheckState(Qt.Checked if is_main_feature else Qt.Unchecked)
       self.listWidget.addItem(item)
@@ -151,7 +169,8 @@ class TargetPage(_FormPage('page04target')):
       return self._path
 
   def initForm(self):
-    self.label.setText(self.config('text.pages.target'))
+    self.label.setText(self.ls('target.label'))
+    self.labelPath.setText(self.ls('target.path'))
     self.initButtonBox('installPage')
     for name, path in c4dfinder.find_installations():
       item = self.C4DInstallation(name, path)
@@ -191,8 +210,8 @@ class InstallPage(_FormPage('page05install')):
     self.textView.setVisible(not self.textView.isVisible())
 
   def on_becomesVisible(self):
-    #self.label.setText(self.config('text.pages.install.collecting'))
-    #self.label.setText(self.config('text.pages.install.copying'))
+    #self.label.setText(self.ls('install.collecting'))
+    #self.label.setText(self.ls('install.copying'))
     # TODO: start the installation process
     pass
 
@@ -207,28 +226,29 @@ class EndPage(_FormPage('page06end')):
 
   def on_becomesVisible(self):
     if self.canceled:
-      text = self.config('text.pages.end.canceled')
+      text = self.ls('end.canceled')
     elif self.error:
-      text = self.config('text.pages.end.failed')
+      text = self.ls('end.failed')
     else:
-      text = self.config('text.pages.end.success')
+      text = self.ls('end.success')
     self.label.setText(text)
 
 
 class Installer(ui.form('installer')):
 
-  def __init__(self, config, parent=None):
+  def __init__(self, config, strings, parent=None):
     self._config = config
+    self._strings = strings
     super().__init__(parent)
 
   def initForm(self):
     self.setWindowFlags(Qt.Window)
-    self.setWindowTitle(self.config('text.title'))
+    self.setWindowTitle(self.ls('installer.title'))
     self.bannerLayout.setSpacing(0)
-    self.bannerLeft.setPixmap(QPixmap(self.config('installer.banner.left')))
-    self.bannerMiddle.setPixmap(QPixmap(self.config('installer.banner.fill')))
-    self.bannerRight.setPixmap(QPixmap(self.config('installer.banner.right')))
-    self.setWindowIcon(QIcon(self.config('installer.icon')))
+    self.bannerLeft.setPixmap(QPixmap("data/image/banner_01.png"))
+    self.bannerMiddle.setPixmap(QPixmap("data/image/banner_02.png"))
+    self.bannerRight.setPixmap(QPixmap("data/image/banner_03.png"))
+    self.setWindowIcon(QIcon("data/image/icon.ico"))
 
     self.aboutPage = AboutPage(self)
     self.welcomePage = WelcomePage(self)
@@ -247,6 +267,33 @@ class Installer(ui.form('installer')):
     self.stackedPages.addWidget(self.endPage)
 
     self.setCurrentPage(self.welcomePage)
+
+  def ls(self, name=None, subst=None):
+    """
+    If *name* is specified, it must be a key of a string from the string
+    resource.
+
+    Otherwise, *subst* must be specified which can be just a string value
+    that will be returned. Also, if *subst* is specified and the key for
+    *name* does not exist, *subst* will be used instead.
+
+    Variables in the returned value will be expanded.
+    """
+
+    if name is not None:
+      try:
+        value = self._strings[name]
+      except KeyError as exc:
+        if subst is None:
+          raise
+        value = subst
+    elif subst is not None:
+      value = subst
+    else:
+      raise ValueError('At least one of "name" and "subst" must be specified')
+
+    template = string.Template(value)
+    return template.safe_substitute(**self._strings.get('__vars__'))
 
   def config(self, name):
     value = self._config
@@ -268,12 +315,19 @@ class Installer(ui.form('installer')):
 
 
 def read_config():
-  with open('config.json') as fp:
+  # We need to read JSON objects ordered for the "features" section.
+  decoder = json.JSONDecoder(object_pairs_hook=collections.OrderedDict)
+  with open('data/config.json') as fp:
+    return decoder.decode(fp.read())
+
+
+def read_strings(lang_code='en'):
+  with open('data/strings/{}.json'.format(lang_code)) as fp:
     return json.load(fp)
 
 
 def main():
   app = QApplication(sys.argv)
-  wnd = Installer(read_config())
+  wnd = Installer(read_config(), read_strings())
   wnd.show()
   return app.exec_()

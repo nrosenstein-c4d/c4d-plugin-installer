@@ -1,0 +1,22 @@
+{
+  "__vars__": {
+    "plugin": "Cinema 4D Plugin",
+    "documentation": "Documentation",
+    "presets": "Preset Files"
+  },
+  "button.about": "About",
+  "button.ok": "Ok",
+  "button.next": "Next",
+  "button.cancel": "Cancel",
+  "button.close": "Close",
+  "installer.title": "$plugin Setup",
+  "about.label": "About this Application",
+  "welcome.label": "Welcome to the $plugin Setup.",
+  "eula.label": "End User License Agreement",
+  "features.label": "Select the features to install",
+  "target.label": "Select a Cinema 4D target installation",
+  "target.path": "Path:",
+  "end.success": "Installation successful",
+  "end.failure": "Installation failed",
+  "end.canceled": "Installation canceled"
+}

@@ -1,0 +1,11 @@
+{
+  "installer": {
+    "name": "C4DPluginInstaller",
+    "bundle_identifier": "com.niklasrosenstein.c4dinstaller"
+  },
+  "features": {
+    "!plugin": "$plugin",
+    "docs": "$documentation",
+    "presets": "$presets"
+  }
+}
