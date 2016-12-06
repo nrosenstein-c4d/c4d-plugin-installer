@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import ui
+from .utils import c4dfinder
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -22,6 +23,7 @@ from PyQt5.QtWidgets import *
 import collections
 import json
 import sys
+import os
 
 
 class _PageBase(object):
@@ -108,9 +110,38 @@ class FeaturesPage(_FormPage('page03features')):
 
 class TargetPage(_FormPage('page04target')):
 
+  class C4DInstallation(QListWidgetItem):
+    def __init__(self, name, path, parent=None):
+      super().__init__(name, parent)
+      self._path = path
+    def installPath(self):
+      return self._path
+
   def initForm(self):
     self.label.setText(self.config('text.pages.target'))
     self.initButtonBox('installPage')
+    for name, path in c4dfinder.find_installations():
+      item = self.C4DInstallation(name, path)
+      self.listWidget.addItem(item)
+      if not self.listWidget.currentItem():
+        self.listWidget.setCurrentItem(item)
+    self.listWidget.itemClicked.connect(self.on_itemClicked)
+    self.buttonChoosePath.clicked.connect(self.on_choosePath)
+    self.targetPath.textChanged.connect(self.on_targetPathChanged)
+    self.on_itemClicked()
+
+  def on_targetPathChanged(self):
+    self.buttonOk.setEnabled(os.path.isdir(self.targetPath.text()))
+
+  def on_itemClicked(self):
+    item = self.listWidget.currentItem()
+    if item:
+      self.targetPath.setText(item.installPath())
+
+  def on_choosePath(self):
+    path = QFileDialog.getExistingDirectory(self, directory=self.targetPath.text())
+    if path:
+      self.targetPath.setText(path)
 
 
 class InstallPage(_FormPage('page05install')):
