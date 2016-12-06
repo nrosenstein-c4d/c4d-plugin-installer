@@ -25,9 +25,13 @@ import sys
 
 class _PageBase(object):
 
+  becomesVisible = pyqtSignal()
+
   def __init__(self, installer):
     self.installer = installer
-    self.config = installer.config
+
+  def config(self, name):
+    return self.installer.config(name)
 
   def initButtonBox(self, nextPage=None):
     self.buttonOk = self.buttonBox.button(QDialogButtonBox.Ok)
@@ -54,21 +58,23 @@ def _FormPage(form_name):
   return Page
 
 
-
 class AboutPage(_FormPage('page00about')):
-  pass
+
+  def initForm(self):
+    self.label.setText(self.config('text.pages.about'))
 
 
 class WelcomePage(_FormPage('page01welcome')):
 
   def initForm(self):
+    self.label.setText(self.config('text.pages.welcome'))
     self.initButtonBox('eulaPage')
-    self.label.setText(self.config['text']['title'])
 
 
 class EulaPage(_FormPage('page02eula')):
 
   def initForm(self):
+    self.label.setText(self.config('text.pages.eula'))
     self.initButtonBox('featuresPage')
     self.radioButtonGroup.buttonClicked.connect(self.on_radioButtonClicked)
     self.on_radioButtonClicked()
@@ -81,8 +87,9 @@ class EulaPage(_FormPage('page02eula')):
 class FeaturesPage(_FormPage('page03features')):
 
   def initForm(self):
+    self.label.setText(self.config('text.pages.features'))
     self.initButtonBox('targetPage')
-    for feature in self.installer.config['features']:
+    for feature in self.installer.config('features'):
       is_main_feature = feature.startswith('@')
       if is_main_feature:
         feature = feature[1:]
@@ -101,6 +108,7 @@ class FeaturesPage(_FormPage('page03features')):
 class TargetPage(_FormPage('page04target')):
 
   def initForm(self):
+    self.label.setText(self.config('text.pages.target'))
     self.initButtonBox('installPage')
 
 
@@ -108,22 +116,41 @@ class InstallPage(_FormPage('page05install')):
 
   def initForm(self):
     self.initButtonBox('endPage')
+    self.becomesVisible.connect(self.on_becomesVisible)
+
+  def on_becomesVisible(self):
+    #self.label.setText(self.config('text.pages.install.collecting'))
+    #self.label.setText(self.config('text.pages.install.copying'))
+    # TODO: start the installation process
+    pass
 
 
 class EndPage(_FormPage('page06end')):
 
   def initForm(self):
+    self.canceled = False
+    self.error = None
     self.initButtonBox()
+    self.becomesVisible.connect(self.on_becomesVisible)
+
+  def on_becomesVisible(self):
+    if self.canceled:
+      text = self.config('text.pages.end.canceled')
+    elif self.error:
+      text = self.config('text.pages.end.failed')
+    else:
+      text = self.config('text.pages.end.success')
+    self.label.setText(text)
 
 
 class Installer(ui.form('installer')):
 
   def __init__(self, config, parent=None):
-    self.config = config
+    self._config = config
     super().__init__(parent)
 
   def initForm(self):
-    self.setWindowTitle(self.config['text']['title'])
+    self.setWindowTitle(self.config('text.title'))
 
     self.aboutPage = AboutPage(self)
     self.welcomePage = WelcomePage(self)
@@ -144,16 +171,23 @@ class Installer(ui.form('installer')):
     self.setCurrentPage(self.welcomePage)
     self.aboutButton.clicked.connect(self.on_aboutButtonClicked)
 
+  def config(self, name):
+    value = self._config
+    for part in name.split('.'):
+      value = value[part]
+    return value
+
+  def cancel(self):
+    self.endPage.canceled = True
+    self.setCurrentPage(self.endPage)
+
   def setCurrentPage(self, page=None, save=True):
     if page is None:
       page = self.currentPage
     if save:
       self.currentPage = page
     self.stackedPages.setCurrentWidget(page)
-
-  def cancel(self):
-    self.endPage.canceled = True
-    self.setCurrentPage(self.endPage)
+    page.becomesVisible.emit()
 
   def on_aboutButtonClicked(self):
     if self.stackedPages.currentWidget() == self.aboutPage:

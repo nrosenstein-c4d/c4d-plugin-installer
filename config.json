@@ -1,7 +1,22 @@
 {
   "text": {
     "title": "Cinema 4D Plugin Installer",
-    "welcome": "Welcome to this Cinema 4D Plugin Installer"
+    "pages": {
+      "about": "About this Cinema 4D Plugin Installer",
+      "welcome": "Welcome to this Cinema 4D Plugin Installer",
+      "eula": "End User License Agreement",
+      "features": "Please choose which features to install",
+      "target": "Select a Cinema 4D version to install the plugin to",
+      "install": {
+        "collecting": "Collecting files to install ...",
+        "copying": "Copying files ..."
+      },
+      "end": {
+        "success": "Installation successful",
+        "canceled": "Installation canceled",
+        "failed": "Installation failed"
+      }
+    }
   },
   "features": [
     "@Main Cinema 4D Plugin",
