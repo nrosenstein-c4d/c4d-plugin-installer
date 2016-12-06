@@ -1,3 +1,12 @@
+nr-plugins/installer
+====================
+
+https://github.com/nr-plugins/installer
+
+A customizable installer for Cinema 4D plugins. Developed by Niklas Rosenstein.
+https://niklasrosenstein.com
+rosensteinniklas@gmail.com
+
 Contents
 ========
 
