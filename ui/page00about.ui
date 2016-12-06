@@ -43,6 +43,11 @@
    </item>
    <item>
     <widget class="QPlainTextEdit" name="textView">
+     <property name="font">
+      <font>
+       <family>Courier New</family>
+      </font>
+     </property>
      <property name="focusPolicy">
       <enum>Qt::NoFocus</enum>
      </property>

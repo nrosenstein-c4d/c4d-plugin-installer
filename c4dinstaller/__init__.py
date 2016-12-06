@@ -71,7 +71,18 @@ class AboutPage(_FormPage('page00about')):
 
   def initForm(self):
     self.label.setText(self.config('text.pages.about'))
+    self.textView.setWordWrapMode(QTextOption.NoWrap)
     self.buttonBack.clicked.connect(lambda: self.installer.setCurrentPage())
+    self.becomesVisible.connect(self.on_becomesVisible)
+
+  def on_becomesVisible(self):
+    if not self.textView.toPlainText():
+      try:
+        with open('data/about.txt') as fp:
+          content = fp.read()
+      except Exception as exc:
+        content = 'Error: ' + str(exc)
+      self.textView.setPlainText(content)
 
 
 class WelcomePage(_FormPage('page01welcome')):
@@ -203,7 +214,7 @@ class Installer(ui.form('installer')):
     super().__init__(parent)
 
   def initForm(self):
-    self.setWindowFlags(Qt.Dialog)
+    self.setWindowFlags(Qt.Window)
     self.setWindowTitle(self.config('text.title'))
     self.bannerLayout.setSpacing(0)
     self.bannerLeft.setPixmap(QPixmap(self.config('installer.banner.left')))
