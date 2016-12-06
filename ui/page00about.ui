@@ -34,12 +34,18 @@
        <property name="text">
         <string>Back</string>
        </property>
+       <property name="default">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
     <widget class="QPlainTextEdit" name="textView">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="readOnly">
       <bool>true</bool>
      </property>
@@ -47,6 +53,10 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>buttonBack</tabstop>
+  <tabstop>textView</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

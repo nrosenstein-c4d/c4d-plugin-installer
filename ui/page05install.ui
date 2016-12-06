@@ -55,6 +55,10 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>toggleDetails</tabstop>
+  <tabstop>textView</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
