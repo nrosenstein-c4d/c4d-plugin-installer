@@ -101,6 +101,14 @@ class EulaPage(_FormPage('page02eula')):
     self.radioButtonGroup.buttonClicked.connect(self.on_radioButtonClicked)
     self.on_radioButtonClicked()
 
+    # Read the contents of the EULA.
+    try:
+      with open('data/eula.txt') as fp:
+        content = fp.read()
+    except Exception as exc:
+      content = 'Error: ' + str(exc)
+    self.textView.setPlainText(content)
+
   def on_radioButtonClicked(self):
     agreed = self.radioButtonGroup.checkedButton() == self.radioAgree
     self.buttonOk.setEnabled(agreed)

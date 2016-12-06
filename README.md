@@ -6,6 +6,10 @@ PyQt5 license requirements.
 
 ![Installer Screenshots](http://i.imgur.com/O2sHbqn.jpg)
 
+Todolist:
+
+- [ ] Install-page logic (collecting & copying files)
+
 ## Requirements
 
 - CPython 3.3 or 3.4 (3.5 not supported by PyInstaller)
@@ -31,11 +35,16 @@ PyQt5 license requirements.
 > \*\*\* Windows builds of GNU Make can be found [here](http://gnuwin32.sourceforge.net/packages/make.htm).
 > The Makefile is known to work with GNU Make 3.8.1
 
-## Configuration
+## Configuration & Customization
 
 *Todo*
 
-The installer is configured using the [`config.json`](config.json) file.
+The installer is configured using the [`config.json`](config.json) file. The
+[`data/`](data) directory contains the banner and icon images as well as the
+EULA and About text.
+
+> Note: You should not change the About text. It is mandatory to include the
+> licenses of all used software.
 
 ## Testing
 

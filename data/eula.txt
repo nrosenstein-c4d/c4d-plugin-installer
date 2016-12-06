@@ -1,0 +1,1 @@
+Please edit data/eula.txt to change the contents of this text box.
