@@ -186,7 +186,10 @@ class Installer(ui.form('installer')):
   def initForm(self):
     self.setWindowFlags(Qt.Dialog)
     self.setWindowTitle(self.config('text.title'))
-    self.banner.setPixmap(QPixmap(self.config('installer.banner')))
+    self.bannerLayout.setSpacing(0)
+    self.bannerLeft.setPixmap(QPixmap(self.config('installer.banner.left')))
+    self.bannerMiddle.setPixmap(QPixmap(self.config('installer.banner.fill')))
+    self.bannerRight.setPixmap(QPixmap(self.config('installer.banner.right')))
     self.setWindowIcon(QIcon(self.config('installer.icon')))
 
     self.aboutPage = AboutPage(self)
