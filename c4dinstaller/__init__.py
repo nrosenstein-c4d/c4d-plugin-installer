@@ -43,8 +43,20 @@ class WelcomePage(ui.form('page01welcome'), _PageMixin):
     self.buttonCancel.clicked.connect(lambda: self.installer.cancel())
 
 
-class EulaPage(ui.form('page02eula')):
-  pass
+class EulaPage(ui.form('page02eula'), _PageMixin):
+
+  def initForm(self):
+    self.buttonNext = self.buttonBox.button(QDialogButtonBox.Ok)
+    self.buttonCancel = self.buttonBox.button(QDialogButtonBox.Cancel)
+    self.buttonNext.setText("Next")
+    self.buttonNext.clicked.connect(lambda: self.installer.setCurrentPage(self.installer.featuresPage))
+    self.buttonCancel.clicked.connect(lambda: self.installer.cancel())
+    self.radioButtonGroup.buttonClicked.connect(self.on_radioButtonClicked)
+    self.on_radioButtonClicked()
+
+  def on_radioButtonClicked(self):
+    agreed = self.radioButtonGroup.checkedButton() == self.radioAgree
+    self.buttonNext.setEnabled(agreed)
 
 
 class FeaturesPage(ui.form('page03features')):
@@ -86,7 +98,7 @@ class Installer(ui.form('installer')):
     self.stackedPages.addWidget(self.endPage)
 
     self.setCurrentPage(self.welcomePage)
-    self.aboutButton.clicked.connect(self.aboutButton_clicked)
+    self.aboutButton.clicked.connect(self.on_aboutButtonClicked)
 
   def setCurrentPage(self, page=None, save=True):
     if page is None:
@@ -99,7 +111,7 @@ class Installer(ui.form('installer')):
     self.endPage.canceled = True
     self.setCurrentPage(self.endPage)
 
-  def aboutButton_clicked(self):
+  def on_aboutButtonClicked(self):
     if self.stackedPages.currentWidget() == self.aboutPage:
       self.aboutButton.setText("About")
       self.setCurrentPage()

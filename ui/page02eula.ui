@@ -29,17 +29,29 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="checkAgree">
+    <widget class="QRadioButton" name="radioAgree">
      <property name="text">
       <string>I agree to the above license terms</string>
      </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <attribute name="buttonGroup">
+      <string notr="true">radioButtonGroup</string>
+     </attribute>
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="checkDisagree">
+    <widget class="QRadioButton" name="radioDisagree">
      <property name="text">
       <string>I disagree to the above license terms</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <attribute name="buttonGroup">
+      <string notr="true">radioButtonGroup</string>
+     </attribute>
     </widget>
    </item>
    <item>
@@ -53,4 +65,7 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="radioButtonGroup"/>
+ </buttongroups>
 </ui>
