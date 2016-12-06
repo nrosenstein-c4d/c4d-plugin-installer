@@ -16,3 +16,6 @@
 """
 This directory will contain all the compiled UI files generated with pyuic5.
 """
+
+def form(name):
+  return __import__(__name__ + '.' + name, fromlist=['Ui_Form']).Ui_Form
