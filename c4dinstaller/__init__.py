@@ -21,12 +21,70 @@ from PyQt5.QtWidgets import *
 import sys
 
 
+class AboutPage(ui.form('page00about')):
+  pass
+
+
 class WelcomePage(ui.form('page01welcome')):
   pass
 
 
-class Installer(ui.form('installer')):
+class EulaPage(ui.form('page02eula')):
   pass
+
+
+class FeaturesPage(ui.form('page03features')):
+  pass
+
+
+class TargetPage(ui.form('page04target')):
+  pass
+
+
+class InstallPage(ui.form('page05install')):
+  pass
+
+
+class EndPage(ui.form('page06end')):
+  pass
+
+
+class Installer(ui.form('installer')):
+
+  def initForm(self):
+    self.aboutPage = AboutPage()
+    self.welcomePage = WelcomePage()
+    self.eulaPage = EulaPage()
+    self.featuresPage = FeaturesPage()
+    self.targetPage = TargetPage()
+    self.installPage = InstallPage()
+    self.endPage = EndPage()
+
+    self.stackedPages.addWidget(self.aboutPage)
+    self.stackedPages.addWidget(self.welcomePage)
+    self.stackedPages.addWidget(self.eulaPage)
+    self.stackedPages.addWidget(self.featuresPage)
+    self.stackedPages.addWidget(self.targetPage)
+    self.stackedPages.addWidget(self.installPage)
+    self.stackedPages.addWidget(self.endPage)
+
+    self.setCurrentPage(self.welcomePage)
+    self.aboutButton.clicked.connect(self.aboutButton_clicked)
+
+  def setCurrentPage(self, page=None, save=True):
+    if page is None:
+      page = self.currentPage
+    if save:
+      self.currentPage = page
+    self.stackedPages.setCurrentWidget(page)
+
+  def aboutButton_clicked(self):
+    if self.stackedPages.currentWidget() == self.aboutPage:
+      self.aboutButton.setText("About")
+      self.setCurrentPage()
+    else:
+      self.aboutButton.setText("Back")
+      self.setCurrentPage(self.aboutPage, False)
 
 
 def main():
