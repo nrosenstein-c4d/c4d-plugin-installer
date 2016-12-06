@@ -21,11 +21,12 @@ from PyQt5.QtWidgets import *
 import sys
 
 
-class Installer(QWidget, ui.form('installer')):
+class WelcomePage(ui.form('page01welcome')):
+  pass
 
-  def __init__(self, parent=None):
-    super().__init__(parent)
-    self.setupUi(self)
+
+class Installer(ui.form('installer')):
+  pass
 
 
 def main():
