@@ -45,9 +45,9 @@ PYUIC5 ?= pyuic5
 PYINSTALLER ?= pyinstaller
 PYTHONPATH := $(PYTHONPATH)$(PATHSEP)libs
 BUILD_DIR = build
-QTUI_LIBS =
+QTUI_LIBS = $(patsubst ui/%.ui,c4dinstaller/ui/%.py,$(wildcard ui/*.ui))
 
-libs/%_ui.py: qtdesigner/%.ui
+c4dinstaller/ui/%.py: ui/%.ui
 	$(PYUIC5) $< -o $@
 
 run: $(QTUI_LIBS)

@@ -1,1 +1,3 @@
 /build
+!/c4dinstaller/ui/__init__.py
+/c4dinstaller/ui/*.py
