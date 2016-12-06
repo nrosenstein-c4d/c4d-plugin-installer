@@ -40,15 +40,21 @@ class _PageBase(object):
     self.buttonOk = self.buttonBox.button(QDialogButtonBox.Ok)
     self.buttonCancel = self.buttonBox.button(QDialogButtonBox.Cancel)
     self.buttonClose = self.buttonBox.button(QDialogButtonBox.Close)
+    self.nextPageName = nextPage
 
     if self.buttonOk:
       self.buttonOk.setText("Next")
     if self.buttonOk and nextPage:
-      self.buttonOk.clicked.connect(lambda: self.installer.setCurrentPage(getattr(self.installer, nextPage)))
+      self.buttonOk.clicked.connect(self.nextPage)
     if self.buttonCancel:
       self.buttonCancel.clicked.connect(lambda: self.installer.cancel())
     if self.buttonClose:
       self.buttonClose.clicked.connect(lambda: self.installer.close())
+
+  def nextPage(self):
+    if self.nextPageName:
+      page = getattr(self.installer, self.nextPageName)
+      self.installer.setCurrentPage(page)
 
 
 def _FormPage(form_name):
@@ -94,7 +100,7 @@ class FeaturesPage(_FormPage('page03features')):
   def initForm(self):
     self.label.setText(self.config('text.pages.features'))
     self.initButtonBox('targetPage')
-    for feature in self.installer.config('features'):
+    for feature in self.config('features'):
       is_main_feature = feature.startswith('@')
       if is_main_feature:
         feature = feature[1:]
@@ -108,6 +114,12 @@ class FeaturesPage(_FormPage('page03features')):
       item.setFlags(flags)
       item.setCheckState(Qt.Checked if is_main_feature else Qt.Unchecked)
       self.listWidget.addItem(item)
+
+    self.becomesVisible.connect(self.on_becomesVisible)
+
+  def on_becomesVisible(self):
+    if not self.config('features'):
+      self.nextPage()
 
 
 class TargetPage(_FormPage('page04target')):
