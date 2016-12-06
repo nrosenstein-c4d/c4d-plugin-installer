@@ -21,12 +21,26 @@ from PyQt5.QtWidgets import *
 import sys
 
 
+class _PageMixin(object):
+
+  @property
+  def installer(self):
+    # StackedWidget -> Installer
+    return self.parent().parent()
+
+
 class AboutPage(ui.form('page00about')):
   pass
 
 
-class WelcomePage(ui.form('page01welcome')):
-  pass
+class WelcomePage(ui.form('page01welcome'), _PageMixin):
+
+  def initForm(self):
+    self.buttonNext = self.buttonBox.button(QDialogButtonBox.Ok)
+    self.buttonCancel = self.buttonBox.button(QDialogButtonBox.Cancel)
+    self.buttonNext.setText("Next")
+    self.buttonNext.clicked.connect(lambda: self.installer.setCurrentPage(self.installer.eulaPage))
+    self.buttonCancel.clicked.connect(lambda: self.installer.cancel())
 
 
 class EulaPage(ui.form('page02eula')):
@@ -45,8 +59,11 @@ class InstallPage(ui.form('page05install')):
   pass
 
 
-class EndPage(ui.form('page06end')):
-  pass
+class EndPage(ui.form('page06end'), _PageMixin):
+
+  def initForm(self):
+    self.buttonClose = self.buttonBox.button(QDialogButtonBox.Close)
+    self.buttonClose.clicked.connect(lambda: self.installer.close())
 
 
 class Installer(ui.form('installer')):
@@ -77,6 +94,10 @@ class Installer(ui.form('installer')):
     if save:
       self.currentPage = page
     self.stackedPages.setCurrentWidget(page)
+
+  def cancel(self):
+    self.endPage.canceled = True
+    self.setCurrentPage(self.endPage)
 
   def aboutButton_clicked(self):
     if self.stackedPages.currentWidget() == self.aboutPage:
