@@ -65,6 +65,7 @@ class AboutPage(_FormPage('page00about')):
 
   def initForm(self):
     self.label.setText(self.config('text.pages.about'))
+    self.buttonBack.clicked.connect(lambda: self.installer.setCurrentPage())
 
 
 class WelcomePage(_FormPage('page01welcome')):
@@ -72,6 +73,7 @@ class WelcomePage(_FormPage('page01welcome')):
   def initForm(self):
     self.label.setText(self.config('text.pages.welcome'))
     self.initButtonBox('eulaPage')
+    self.buttonAbout.clicked.connect(lambda: self.installer.setCurrentPage(self.installer.aboutPage, False))
 
 
 class EulaPage(_FormPage('page02eula')):
@@ -182,6 +184,7 @@ class Installer(ui.form('installer')):
     super().__init__(parent)
 
   def initForm(self):
+    self.setWindowFlags(Qt.Dialog)
     self.setWindowTitle(self.config('text.title'))
     self.banner.setPixmap(QPixmap(self.config('installer.banner')))
     self.setWindowIcon(QIcon(self.config('installer.icon')))
@@ -203,7 +206,6 @@ class Installer(ui.form('installer')):
     self.stackedPages.addWidget(self.endPage)
 
     self.setCurrentPage(self.welcomePage)
-    self.aboutButton.clicked.connect(self.on_aboutButtonClicked)
 
   def config(self, name):
     value = self._config
@@ -222,14 +224,6 @@ class Installer(ui.form('installer')):
       self.currentPage = page
     self.stackedPages.setCurrentWidget(page)
     page.becomesVisible.emit()
-
-  def on_aboutButtonClicked(self):
-    if self.stackedPages.currentWidget() == self.aboutPage:
-      self.aboutButton.setText("About")
-      self.setCurrentPage()
-    else:
-      self.aboutButton.setText("Back")
-      self.setCurrentPage(self.aboutPage, False)
 
 
 def read_config():
