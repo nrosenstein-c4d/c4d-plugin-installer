@@ -28,6 +28,20 @@ class _PageMixin(object):
     # StackedWidget -> Installer
     return self.parent().parent()
 
+  def initButtonBox(self, nextPage=None):
+      self.buttonOk = self.buttonBox.button(QDialogButtonBox.Ok)
+      self.buttonCancel = self.buttonBox.button(QDialogButtonBox.Cancel)
+      self.buttonClose = self.buttonBox.button(QDialogButtonBox.Close)
+
+      if self.buttonOk:
+        self.buttonOk.setText("Next")
+      if self.buttonOk and nextPage:
+        self.buttonOk.clicked.connect(lambda: self.installer.setCurrentPage(getattr(self.installer, nextPage)))
+      if self.buttonCancel:
+        self.buttonCancel.clicked.connect(lambda: self.installer.cancel())
+      if self.buttonClose:
+        self.buttonClose.clicked.connect(lambda: self.installer.close())
+
 
 class AboutPage(ui.form('page00about')):
   pass
@@ -36,46 +50,43 @@ class AboutPage(ui.form('page00about')):
 class WelcomePage(ui.form('page01welcome'), _PageMixin):
 
   def initForm(self):
-    self.buttonNext = self.buttonBox.button(QDialogButtonBox.Ok)
-    self.buttonCancel = self.buttonBox.button(QDialogButtonBox.Cancel)
-    self.buttonNext.setText("Next")
-    self.buttonNext.clicked.connect(lambda: self.installer.setCurrentPage(self.installer.eulaPage))
-    self.buttonCancel.clicked.connect(lambda: self.installer.cancel())
+    self.initButtonBox('eulaPage')
 
 
 class EulaPage(ui.form('page02eula'), _PageMixin):
 
   def initForm(self):
-    self.buttonNext = self.buttonBox.button(QDialogButtonBox.Ok)
-    self.buttonCancel = self.buttonBox.button(QDialogButtonBox.Cancel)
-    self.buttonNext.setText("Next")
-    self.buttonNext.clicked.connect(lambda: self.installer.setCurrentPage(self.installer.featuresPage))
-    self.buttonCancel.clicked.connect(lambda: self.installer.cancel())
+    self.initButtonBox('featuresPage')
     self.radioButtonGroup.buttonClicked.connect(self.on_radioButtonClicked)
     self.on_radioButtonClicked()
 
   def on_radioButtonClicked(self):
     agreed = self.radioButtonGroup.checkedButton() == self.radioAgree
-    self.buttonNext.setEnabled(agreed)
+    self.buttonOk.setEnabled(agreed)
 
 
-class FeaturesPage(ui.form('page03features')):
-  pass
+class FeaturesPage(ui.form('page03features'), _PageMixin):
+
+  def initForm(self):
+    self.initButtonBox('targetPage')
 
 
-class TargetPage(ui.form('page04target')):
-  pass
+class TargetPage(ui.form('page04target'), _PageMixin):
+
+  def initForm(self):
+    self.initButtonBox('installPage')
 
 
-class InstallPage(ui.form('page05install')):
-  pass
+class InstallPage(ui.form('page05install'), _PageMixin):
+
+  def initForm(self):
+    self.initButtonBox('endPage')
 
 
 class EndPage(ui.form('page06end'), _PageMixin):
 
   def initForm(self):
-    self.buttonClose = self.buttonBox.button(QDialogButtonBox.Close)
-    self.buttonClose.clicked.connect(lambda: self.installer.close())
+    self.initButtonBox()
 
 
 class Installer(ui.form('installer')):
