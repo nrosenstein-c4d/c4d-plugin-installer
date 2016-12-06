@@ -16,6 +16,7 @@
 
 from . import ui
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import collections
@@ -151,6 +152,8 @@ class Installer(ui.form('installer')):
 
   def initForm(self):
     self.setWindowTitle(self.config('text.title'))
+    self.banner.setPixmap(QPixmap(self.config('installer.banner')))
+    self.setWindowIcon(QIcon(self.config('installer.icon')))
 
     self.aboutPage = AboutPage(self)
     self.welcomePage = WelcomePage(self)

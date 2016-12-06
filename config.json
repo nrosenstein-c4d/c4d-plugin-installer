@@ -1,4 +1,11 @@
 {
+  "installer": {
+    "name": "C4DPluginInstaller",
+    "icon": "data/icon.ico",
+    "bundle_icon": "data/icon.icns",
+    "bundle_identifier": "com.niklasrosenstein.c4dinstaller",
+    "banner": "data/banner.png"
+  },
   "text": {
     "title": "Cinema 4D Plugin Installer",
     "pages": {

@@ -16,14 +16,35 @@
 
 import os
 import sys
+import json
 
-installer_name = 'C4DInstaller'
+def recursive_data_files(path, target_dir):
+  result = []
+  path = os.path.abspath(path)
+  for root, dirs, files in os.walk(path):
+    arcdir = os.path.relpath(root, path)
+    if arcdir == '.':
+      arcdir = target_dir
+    else:
+      arcdir = os.path.join(target_dir, arcdir)
+    for filename in files:
+      result.append((os.path.join(root, filename), arcdir))
+  return result
+
+with open('config.json') as fp:
+  config = json.load(fp)['installer']
+  del fp
+
+is_mac = sys.platform.startswith('darwin')
+
+installer_name = config['name']
+installer_icon = config['icon'] if not is_mac else config['bundle_icon']
 block_cipher = None
 
 a = Analysis(['bootstrapper.py'],
   pathex = [os.getcwd()],
   binaries = None,
-  datas = [],
+  datas = [('config.json', '.')] + recursive_data_files('data', 'data'),
   hiddenimports = ['c4dinstaller.ui.' + x[:-3] for x in os.listdir('c4dinstaller/ui')],
   hookspath = [],
   runtime_hooks = [],
@@ -41,11 +62,11 @@ exe = EXE(pyz, a.scripts, a.binaries, a.zipfiles, a.datas,
   upx = False,
   console = True,
   uac_admin = True,
-  icon = None)
+  icon = installer_icon)
 
-if sys.platform.startswith('darwin'):
+if is_mac:
   app = BUNDLE(exe,
     name = installer_name + '.app',
-    icon = None,
-    bundle_identifier = 'com.laublab.vraybridge.installer',
+    icon = installer_icon,
+    bundle_identifier = config['bundle_identifier'],
     upx = False)
