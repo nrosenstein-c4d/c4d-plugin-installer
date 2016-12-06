@@ -18,7 +18,9 @@ This directory will contain all the compiled UI files generated with pyuic5.
 """
 
 from PyQt5.QtWidgets import QWidget
+from functools import lru_cache
 
+@lru_cache()
 def form(name, base_class=QWidget):
   form_class = __import__(__name__ + '.' + name, fromlist=['Ui_Form']).Ui_Form
   class Widget(base_class, form_class):

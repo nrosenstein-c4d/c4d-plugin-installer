@@ -1,0 +1,11 @@
+{
+  "text": {
+    "title": "Cinema 4D Plugin Installer",
+    "welcome": "Welcome to this Cinema 4D Plugin Installer"
+  },
+  "features": [
+    "@Main Cinema 4D Plugin",
+    "Documentation",
+    "Preset Files"
+  ]
+}

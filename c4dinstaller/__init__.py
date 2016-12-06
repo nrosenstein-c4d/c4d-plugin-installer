@@ -18,42 +18,55 @@ from . import ui
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+import collections
+import json
 import sys
 
 
-class _PageMixin(object):
+class _PageBase(object):
 
-  @property
-  def installer(self):
-    # StackedWidget -> Installer
-    return self.parent().parent()
+  def __init__(self, installer):
+    self.installer = installer
+    self.config = installer.config
 
   def initButtonBox(self, nextPage=None):
-      self.buttonOk = self.buttonBox.button(QDialogButtonBox.Ok)
-      self.buttonCancel = self.buttonBox.button(QDialogButtonBox.Cancel)
-      self.buttonClose = self.buttonBox.button(QDialogButtonBox.Close)
+    self.buttonOk = self.buttonBox.button(QDialogButtonBox.Ok)
+    self.buttonCancel = self.buttonBox.button(QDialogButtonBox.Cancel)
+    self.buttonClose = self.buttonBox.button(QDialogButtonBox.Close)
 
-      if self.buttonOk:
-        self.buttonOk.setText("Next")
-      if self.buttonOk and nextPage:
-        self.buttonOk.clicked.connect(lambda: self.installer.setCurrentPage(getattr(self.installer, nextPage)))
-      if self.buttonCancel:
-        self.buttonCancel.clicked.connect(lambda: self.installer.cancel())
-      if self.buttonClose:
-        self.buttonClose.clicked.connect(lambda: self.installer.close())
+    if self.buttonOk:
+      self.buttonOk.setText("Next")
+    if self.buttonOk and nextPage:
+      self.buttonOk.clicked.connect(lambda: self.installer.setCurrentPage(getattr(self.installer, nextPage)))
+    if self.buttonCancel:
+      self.buttonCancel.clicked.connect(lambda: self.installer.cancel())
+    if self.buttonClose:
+      self.buttonClose.clicked.connect(lambda: self.installer.close())
 
 
-class AboutPage(ui.form('page00about')):
+def _FormPage(form_name):
+  form_class = ui.form(form_name)
+  class Page(form_class, _PageBase):
+    def __init__(self, installer, parent=None):
+      _PageBase.__init__(self, installer)
+      form_class.__init__(self, parent)
+  Page.__name__ = '_FormPage_' + form_name
+  return Page
+
+
+
+class AboutPage(_FormPage('page00about')):
   pass
 
 
-class WelcomePage(ui.form('page01welcome'), _PageMixin):
+class WelcomePage(_FormPage('page01welcome')):
 
   def initForm(self):
     self.initButtonBox('eulaPage')
+    self.label.setText(self.config['text']['title'])
 
 
-class EulaPage(ui.form('page02eula'), _PageMixin):
+class EulaPage(_FormPage('page02eula')):
 
   def initForm(self):
     self.initButtonBox('featuresPage')
@@ -65,25 +78,39 @@ class EulaPage(ui.form('page02eula'), _PageMixin):
     self.buttonOk.setEnabled(agreed)
 
 
-class FeaturesPage(ui.form('page03features'), _PageMixin):
+class FeaturesPage(_FormPage('page03features')):
 
   def initForm(self):
     self.initButtonBox('targetPage')
+    for feature in self.installer.config['features']:
+      is_main_feature = feature.startswith('@')
+      if is_main_feature:
+        feature = feature[1:]
+      enabled = not is_main_feature
+
+      flags = Qt.ItemIsUserCheckable
+      if enabled:
+        flags |= Qt.ItemIsEnabled
+
+      item = QListWidgetItem(feature)
+      item.setFlags(flags)
+      item.setCheckState(Qt.Checked if is_main_feature else Qt.Unchecked)
+      self.listWidget.addItem(item)
 
 
-class TargetPage(ui.form('page04target'), _PageMixin):
+class TargetPage(_FormPage('page04target')):
 
   def initForm(self):
     self.initButtonBox('installPage')
 
 
-class InstallPage(ui.form('page05install'), _PageMixin):
+class InstallPage(_FormPage('page05install')):
 
   def initForm(self):
     self.initButtonBox('endPage')
 
 
-class EndPage(ui.form('page06end'), _PageMixin):
+class EndPage(_FormPage('page06end')):
 
   def initForm(self):
     self.initButtonBox()
@@ -91,14 +118,20 @@ class EndPage(ui.form('page06end'), _PageMixin):
 
 class Installer(ui.form('installer')):
 
+  def __init__(self, config, parent=None):
+    self.config = config
+    super().__init__(parent)
+
   def initForm(self):
-    self.aboutPage = AboutPage()
-    self.welcomePage = WelcomePage()
-    self.eulaPage = EulaPage()
-    self.featuresPage = FeaturesPage()
-    self.targetPage = TargetPage()
-    self.installPage = InstallPage()
-    self.endPage = EndPage()
+    self.setWindowTitle(self.config['text']['title'])
+
+    self.aboutPage = AboutPage(self)
+    self.welcomePage = WelcomePage(self)
+    self.eulaPage = EulaPage(self)
+    self.featuresPage = FeaturesPage(self)
+    self.targetPage = TargetPage(self)
+    self.installPage = InstallPage(self)
+    self.endPage = EndPage(self)
 
     self.stackedPages.addWidget(self.aboutPage)
     self.stackedPages.addWidget(self.welcomePage)
@@ -131,8 +164,13 @@ class Installer(ui.form('installer')):
       self.setCurrentPage(self.aboutPage, False)
 
 
+def read_config():
+  with open('config.json') as fp:
+    return json.load(fp)
+
+
 def main():
   app = QApplication(sys.argv)
-  wnd = Installer()
+  wnd = Installer(read_config())
   wnd.show()
   return app.exec_()
