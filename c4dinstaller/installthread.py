@@ -77,6 +77,7 @@ class InstallThread(QObject):
     self._thread = None
     self._lock = threading.Lock()
     self._mode = None
+    self._installedFiles = None
 
   def _log(self, *objects, sep=' ', end='\n'):
     message = sep.join(map(str, objects)) + end
@@ -93,7 +94,7 @@ class InstallThread(QObject):
   def _run(self):
     Mode = self.Mode
     filelist = []
-    installedfiles = []
+    installedFiles = self._installedFiles = []
 
     try:
       # Generate a list of all source and target files.
@@ -127,8 +128,8 @@ class InstallThread(QObject):
 
       # Try to undo all installed files.
       self._log('Removing already installed files ...')
-      for i, filename in enumerate(installedfiles):
-        self._updateProgress(Mode.Undo, 1.0 - i / len(installedfiles))
+      for i, filename in enumerate(installedFiles):
+        self._updateProgress(Mode.Undo, 1.0 - i / len(installedFiles))
         try:
           os.remove(filename)
         except OSError as exc:
@@ -166,6 +167,10 @@ class InstallThread(QObject):
     self._thread = threading.Thread(target=self._run)
     self._thread.start()
     print("note: Installer thread started")
+
+  def installedFiles(self):
+    " Only access while installer is NOT running. "
+    return self._installedFiles
 
 
 def get_filelist(from_, to):
