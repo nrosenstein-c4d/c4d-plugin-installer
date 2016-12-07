@@ -54,7 +54,7 @@ run: $(QTUI_LIBS)
 	PYTHONPATH="$(PYTHONPATH)" $(PYTHON) "bootstrapper.py"
 
 installer: bootstrapper.py bootstrapper.spec $(QTUI_LIBS)
-	PYTHONPATH="$(PYTHONPATH)" $(PYINSTALLER) bootstrapper.spec -y \
+	PYTHONPATH="$(PYTHONPATH)" $(PYINSTALLER) bootstrapper.spec -y --uac-admin --onefile \
 		--workpath "$(BUILD_DIR)/temp" --distpath "$(BUILD_DIR)/dist"
 
 clean-qtui:

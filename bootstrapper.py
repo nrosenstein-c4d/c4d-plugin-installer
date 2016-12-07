@@ -16,6 +16,7 @@
 
 import ctypes
 import os
+import shlex
 import subprocess
 import sys
 import traceback
@@ -43,10 +44,11 @@ if sys.version < '3.3':
 
 # Change to the directory that contains the unpacked resource files if
 # available. _MEIPASS is set by the PyInstaller bootstrapper.
+sys.frozen = getattr(sys, 'frozen', False)
 if hasattr(sys, '_MEIPASS'):
   print('note: changing to _MEI directory:', sys._MEIPASS)
   os.chdir(sys._MEIPASS)
-elif getattr(sys, 'frozen', False):
+elif sys.frozen:
   fatal('frozen environment has no sys._MEIPASS')
 
 
@@ -57,20 +59,31 @@ def is_admin():
     return ctypes.windll.shell32.IsUserAnAdmin() != 0
 
 
+def elevate(command):
+  """
+  Runs *command* with elevated privileges and returns the exit-code
+  of the command.
+  """
+
+  if sys.platform.startswith('darwin'):
+    command = ' '.join(shlex.quote(c) for c in command)
+    cmd = ['/usr/bin/osascript', '-e']
+    cmd.append('do shell script "{} 2>&1" with administrator privileges'
+        .format(shlex.quote(command)))
+    return subprocess.call(cmd)
+  else:
+    raise NotImplementedError("Can not elevate process on Windows")
+
+
 def main():
   try:
     if not is_admin():
-      if sys.platform.startswith('darwin'):
-        print('note: no admin privileges, using osascript ...')
-        cmd = [
-          '/usr/bin/osascript', '-e',
-          'do shell script "{} {} 2>&1" with administrator privileges'
-            .format(sys.executable, sys.argv[0])
-          ]
-        return subprocess.call(cmd)
-      elif sys.platform.startswith('win'):
-        print('note: no admin privileges, not sure what to do on windows!')
-        raise NotImplementedError('Admin switch not implemented on Windows')
+      try:
+        elevate([sys.executable, os.path.abspath(sys.argv[0])])
+      except NotImplementedError as exc:
+        if sys.frozen:
+          raise
+        print('note:', exc)
 
     import c4dinstaller
     res = c4dinstaller.main()
@@ -80,6 +93,7 @@ def main():
     raise
   else:
     sys.exit(res)
+
 
 if __name__ == '__main__':
   main()

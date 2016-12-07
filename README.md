@@ -174,6 +174,14 @@ variable to point to the correct program, eg. `PYTHON=py -3.4` or
 
     make installer
 
+## Installer admin privileges
+
+On Windows, the installer is built with UAC enabled. Note that there is
+currently nothing implemented to have `make run` run as administrator
+
+On Mac OS, the `/usr/bin/osascript` workaround is used to ask the user for
+elevated privileges and then execute the installer in that environment.
+
 ---
 
 <p align="center">Copyright &copy; 2016 &ndash; Niklas Rosenstein</p>
