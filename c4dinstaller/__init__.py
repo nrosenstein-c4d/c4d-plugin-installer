@@ -315,6 +315,47 @@ class Installer(ui.form('installer')):
     self.stackedPages.addWidget(self.endPage)
 
     self.setCurrentPage(self.welcomePage)
+    self.initStyle()
+
+  def initStyle(self):
+    buttonStyle = ""
+    lineEditStyle = ""
+    palette = self.palette()
+    color = self.config('palette.background')
+    if color:
+      palette.setColor(QPalette.Window, QColor(*color))
+      palette.setColor(QPalette.Base, QColor(*color))
+      palette.setColor(QPalette.AlternateBase, QColor(*color))
+    color = self.config('palette.alternate_background')
+    if color:
+      palette.setColor(QPalette.Base, QColor(*color))
+    if color:
+      color = self.config('palette.foreground')
+    if color:
+      palette.setColor(QPalette.Text, QColor(*color))
+      palette.setColor(QPalette.ButtonText, QColor(*color))
+      palette.setColor(QPalette.WindowText, QColor(*color))
+    color = self.config('palette.button_background')
+    if color:
+      color = "rgba(" + ",".join(map(str, color)) + ")"
+      buttonStyle += "background:%s;\n" % color
+      lineEditStyle += "QLineEdit{border: 1px solid gray; background-color: %s;} "\
+          "QLineEdit:hover{border: 1px solid gray; background-color: %s;}" % (color, color)
+    color = self.config('palette.button_foreground')
+    if color:
+      buttonStyle += "color:rgba(" + ",".join(map(str, color)) + ");\n"
+    self.setPalette(palette)
+
+    def applyStyle(widget):
+      if isinstance(widget, (QPushButton, QToolButton)):
+        widget.setStyleSheet(buttonStyle)
+      elif isinstance(widget, QLineEdit):
+        widget.setStyleSheet(lineEditStyle)
+        widget.setAutoFillBackground(True)
+        widget.setPalette(palette)
+      for child in widget.findChildren(QWidget):
+        applyStyle(child)
+    applyStyle(self)
 
   def ls(self, name=None, subst=None):
     """

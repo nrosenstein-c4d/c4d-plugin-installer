@@ -57,6 +57,21 @@ The strings that are displayed in the dialog are defined in
 `$varname` or `${varname}`. These variables are defined in the `"__vars__"`
 section of the same string file.
 
+#### Colors
+
+In [data/config.json] you can find a `"palette"` field which describes the
+colors of window components as RGB values.
+
+```json
+  "palette": {
+    "background": [40, 40, 40],
+    "foreground": [200, 200, 200],
+    "alternate_background": [70, 70, 70],
+    "button_background": [50, 50, 50],
+    "button_foreground": [220, 220, 220]
+  }
+```
+
 #### Feature Configuration
 
 Note that these variables are also supported in the `"features"` object
