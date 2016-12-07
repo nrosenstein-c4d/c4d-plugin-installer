@@ -1,8 +1,4 @@
-# C4D installer
-
-This repository provides a customizable installer for Cinema 4D plugins based
-on CPython 3, PyInstaller and PyQt5. It is licensed under GPL to abide the
-PyQt5 license requirements.
+# Customisable Cinema 4D Plugin Installer
 
 <p align="center">
   <a title="Go to the video" href="http://i.imgur.com/kIHBFmq.mp4">
@@ -10,7 +6,10 @@ PyQt5 license requirements.
   </a>
 </p>
 
-Todolist:
+Easily create an installer for your Cinema 4D plugin for Windows and Mac OS.
+Replace the banner and icon, update some configuration, build & done.
+
+## Todo
 
 - [x] Install-page logic (collecting & copying files)
 - [ ] Install-page cancel and next button behaviour
@@ -40,7 +39,7 @@ Todolist:
 > \*\*\* Windows builds of GNU Make can be found [here](http://gnuwin32.sourceforge.net/packages/make.htm).
 > The Makefile is known to work with GNU Make 3.8.1
 
-## Configuration & Customization
+## Configuration & Customisation
 
 The main configuration file is [data/config.json](data/config.json). There
 you need to specify the following information:
