@@ -7,5 +7,16 @@
     "!plugin": "$plugin",
     "docs": "$documentation",
     "presets": "$presets"
+  },
+  "install": {
+    "plugin": {
+      "$src/plugin/": "$c4d/plugins/C4DInstaller_ExamplePlugin/"
+    },
+    "docs": {
+      "$src/doc/": "$c4d/plugins/C4DInstaller_ExamplePlugin/doc/"
+    },
+    "presets": {
+      "$src/library/": "$c4d/library/"
+    }
   }
 }

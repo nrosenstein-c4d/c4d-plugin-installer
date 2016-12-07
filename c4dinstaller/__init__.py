@@ -15,12 +15,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import ui
+from .installthread import InstallThread
 from .utils import c4dfinder
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import collections
+import io
 import json
 import string
 import sys
@@ -157,6 +159,10 @@ class FeaturesPage(_FormPage('page03features')):
     if not self.config('features'):
       self.nextPage()
 
+  def iterFeatures(self):
+    for index in range(self.listWidget.count()):
+      yield self.listWidget.item(index)
+
 
 class TargetPage(_FormPage('page04target')):
 
@@ -182,7 +188,9 @@ class TargetPage(_FormPage('page04target')):
     self.on_itemClicked()
 
   def on_targetPathChanged(self):
-    self.buttonOk.setEnabled(os.path.isdir(self.targetPath.text()))
+    path = self.targetPath.text()
+    valid = os.path.isabs(path) and os.path.isdir(path)
+    self.buttonOk.setEnabled(valid)
 
   def on_itemClicked(self):
     item = self.listWidget.currentItem()
@@ -209,10 +217,46 @@ class InstallPage(_FormPage('page05install')):
     self.textView.setVisible(not self.textView.isVisible())
 
   def on_becomesVisible(self):
-    #self.label.setText(self.ls('install.collecting'))
-    #self.label.setText(self.ls('install.copying'))
-    # TODO: start the installation process
-    pass
+    targetPath = self.installer.targetPage.targetPath.text()
+    if not targetPath or not os.path.isdir(targetPath) or not os.path.isabs(targetPath):
+      QMessageBox.critical(None, 'Error', 'The target directory "{}" does not exist'.format(targetPath))
+      self.installer.cancel()
+      return
+
+    copyfiles = []
+    for feature in self.installer.featuresPage.iterFeatures():
+      if feature.checkState() == Qt.Checked:
+        copyfiles += self.installer.config('install.' + feature.ident()).items()
+
+    # Expand variables in the copyfiles list.
+    vars = {'c4d': targetPath, 'src': os.path.abspath('data/install')}
+    def render(x): return string.Template(x).substitute(**vars)
+    copyfiles = [(render(s), render(d)) for (s, d) in copyfiles]
+
+    self.installLog = io.StringIO()
+    self.installThread = InstallThread(copyfiles)
+    self.installThread.logUpdate.connect(self.on_logUpdate, Qt.QueuedConnection)
+    self.installThread.progressUpdate.connect(self.on_progressUpdate, Qt.QueuedConnection)
+    self.installThread.start()
+
+  def on_logUpdate(self, text):
+    self.installLog.write(text)
+    self.textView.setPlainText(self.installLog.getvalue())
+
+  def on_progressUpdate(self, mode, progress):
+    if mode == InstallThread.Mode.Collect:
+      self.label.setText(self.ls('install.collect'))
+    elif mode == InstallThread.Mode.Copy:
+      self.label.setText(self.ls('install.copy'))
+    elif mode == InstallThread.Mode.Undo:
+      self.label.setText(self.ls('install.undo'))
+    elif mode == InstallThread.Mode.Complete:
+      self.label.setText(self.ls('install.complete'))
+    elif mode == InstallThread.Mode.Cancelled:
+      self.label.setText(self.ls('install.cancelled'))
+    elif mode == InstallThread.Mode.Error:
+      self.label.setText(self.ls('install.error'))
+    self.progressBar.setValue(progress * 100)
 
 
 class EndPage(_FormPage('page06end')):
