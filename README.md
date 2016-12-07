@@ -1,10 +1,15 @@
 # Customisable Cinema 4D Plugin Installer
 
-<p align="center">
-  <a title="Go to the video" href="http://i.imgur.com/kIHBFmq.mp4">
-    <img alt="Installer Preview" src="http://i.imgur.com/jwzZKsU.png"/>
-  </a>
-</p>
+<table><tr>
+  <td><p align="center">01 Welcome</p><img src="https://i.imgur.com/8IsfiOr.png"/></td>
+  <td><p align="center">02 EULA</p><img src="https://i.imgur.com/OltXTrd.png"/></td>
+  <td><p align="center">03 Features</p><img src="https://i.imgur.com/jDCagZE.png"/></td>
+  <td><p align="center">04 Target</p><img src="https://i.imgur.com/4I1GWn9.png"/></td>
+</tr><tr>
+  <td><p align="center">05 Install</p><img src="https://i.imgur.com/jM9GU4r.png"/></td>
+  <td><p align="center">06 End</p><img src="https://i.imgur.com/hX57pCP.png"/></td>
+  <td><p align="center">00 About Page</p><img src="https://i.imgur.com/od3FLgX.png"/></td>
+</tr></table>
 
 Easily create an installer for your Cinema 4D plugin for Windows and Mac OS.
 Replace the banner and icon, update some configuration, build & done.
