@@ -73,7 +73,9 @@ colors of window components as RGB values.
     "foreground": [200, 200, 200],
     "alternate_background": [70, 70, 70],
     "button_background": [50, 50, 50],
-    "button_foreground": [220, 220, 220]
+    "button_foreground": [220, 220, 220],
+    "button_disabled_background": [70, 70, 70],
+    "button_disabled_foreground": [160, 160, 160]
   }
 ```
 

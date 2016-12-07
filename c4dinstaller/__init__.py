@@ -338,33 +338,33 @@ class Installer(ui.form('installer')):
     self.initStyle()
 
   def initStyle(self):
+    def rgb(color): return "rgb(" + ",".join(map(str, color)) + ")"
     buttonStyle = ""
     lineEditStyle = ""
     palette = self.palette()
+
     color = self.config('palette.background')
-    if color:
-      palette.setColor(QPalette.Window, QColor(*color))
-      palette.setColor(QPalette.Base, QColor(*color))
-      palette.setColor(QPalette.AlternateBase, QColor(*color))
+    palette.setColor(QPalette.Window, QColor(*color))
+    palette.setColor(QPalette.Base, QColor(*color))
+    palette.setColor(QPalette.AlternateBase, QColor(*color))
+
     color = self.config('palette.alternate_background')
-    if color:
-      palette.setColor(QPalette.Base, QColor(*color))
-    if color:
-      color = self.config('palette.foreground')
-    if color:
-      palette.setColor(QPalette.Text, QColor(*color))
-      palette.setColor(QPalette.ButtonText, QColor(*color))
-      palette.setColor(QPalette.WindowText, QColor(*color))
-    color = self.config('palette.button_background')
-    if color:
-      color = "rgba(" + ",".join(map(str, color)) + ")"
-      buttonStyle += "background:%s;\n" % color
-      lineEditStyle += "QLineEdit{border: 1px solid gray; background-color: %s;} "\
-          "QLineEdit:hover{border: 1px solid gray; background-color: %s;}" % (color, color)
-    color = self.config('palette.button_foreground')
-    if color:
-      buttonStyle += "color:rgba(" + ",".join(map(str, color)) + ");\n"
-    self.setPalette(palette)
+    palette.setColor(QPalette.Base, QColor(*color))
+
+    color = self.config('palette.foreground')
+    palette.setColor(QPalette.Text, QColor(*color))
+    palette.setColor(QPalette.ButtonText, QColor(*color))
+    palette.setColor(QPalette.WindowText, QColor(*color))
+
+    bg = rgb(self.config('palette.button_background'))
+    fg = rgb(self.config('palette.button_foreground'))
+    buttonStyle += "QPushButton { background:%s; color: %s} " % (bg, fg)
+    lineEditStyle += "QLineEdit{border: 1px solid gray; background-color: %s;} "\
+        "QLineEdit:hover{border: 1px solid gray; background-color: %s;}" % (bg, bg)
+
+    bg = rgb(self.config('palette.button_disabled_background'))
+    fg = rgb(self.config('palette.button_disabled_foreground'))
+    buttonStyle += 'QPushButton:disabled { background: %s; color: %s }\n' % (bg, fg)
 
     def applyStyle(widget):
       if isinstance(widget, (QPushButton, QToolButton)):
@@ -375,6 +375,8 @@ class Installer(ui.form('installer')):
         widget.setPalette(palette)
       for child in widget.findChildren(QWidget):
         applyStyle(child)
+
+    self.setPalette(palette)
     applyStyle(self)
 
   def ls(self, name=None, subst=None):
