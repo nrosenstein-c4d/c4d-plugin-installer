@@ -31,7 +31,7 @@ def recursive_data_files(path, target_dir):
       result.append((os.path.join(root, filename), arcdir))
   return result
 
-with open('config.json') as fp:
+with open('data/config.json') as fp:
   config = json.load(fp)['installer']
   del fp
 
