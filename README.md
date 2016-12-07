@@ -142,15 +142,21 @@ progress to slow down and make it easier to track what's happening.
 
 The `"dependencies"` section is used to specify additional installers that
 need to be installed for the plugin to function. Variable substition is
-supported in the `"name"`, `"file"` and `"args"` fields. The fields `"returncode"`
-and `"args"` are optional. Valid values for `"platform"` are `"windows"` and
-`"osx"`. **Example:**
+supported in the `"name"`, `"file"` and `"args"` fields. The fields
+`"returncode"`, `"args"` and `"features"` are optional. Valid values for
+`"platform"` are `"windows"` and `"osx"`. **Example:**
+
+> In the `"features"` field, you must list the IDs of the features that cause
+> this dependency to be installed. In the example below, the dependency will
+> only be installed if the `plugin` feature is selected to be installed by the
+> user.
 
 ```json
     "dependencies": [
       {
         "name": "MSVC++ 2015 Redistributable (x64) - 14.0.23026",
         "platform": "windows",
+        "features": ["plugin"],
         "file": "$src/redist/windows/vc_redist-2015-14.0.23026-x64.exe",
         "args": ["/install"],
         "returncodes": [0, 1638]

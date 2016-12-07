@@ -172,7 +172,7 @@ class InstallThread(QObject):
       self._log('Installation successful!')
     except Exception as exc:
       traceback.print_exc()
-      self.running = False
+      self._running = False
 
       if isinstance(exc, InstallCancelled):
         self._log("User cancelled installation.")

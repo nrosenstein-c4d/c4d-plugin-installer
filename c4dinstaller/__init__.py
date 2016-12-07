@@ -251,17 +251,24 @@ class InstallPage(_FormPage('page05install')):
     def render(x): return string.Template(x).substitute(**vars)
 
     copyfiles = []
+    haveFeatures = set()
     for feature in self.installer.featuresPage.iterFeatures():
       if feature.checkState() == Qt.Checked:
-        copyfiles += self.installer.config('install.copyfiles.' + feature.ident()).items()
+        haveFeatures.add(feature.ident())
+        copyfiles += self.installer.config('install.copyfiles.' + feature.ident(), {}).items()
     copyfiles = [(render(s), render(d)) for (s, d) in copyfiles]
 
     dependencies = []
     for dep in self.config('install.dependencies'):
-      name = render(dep['name'])
+      name = self.ls(subst=dep['name'])
       if dep['platform'] != PLATFORM:
-        print('note: skipping dependency:', name)
+        print('note: skipping dependency:', name, '(platform is not', dep['platform'], ')')
         continue
+      features = set(dep.get('features', []))
+      if features and not (features & haveFeatures):
+        print('note: skipping dependency:', name, '(none of', features, 'will be installed)')
+        continue
+
       cmd = list(map(render, [dep['file']] + dep.get('args', [])))
       ret = dep.get('returncodes', [0])
       dep = InstallDependency(name, cmd, ret)
@@ -427,10 +434,15 @@ class Installer(ui.form('installer')):
     template = string.Template(value)
     return template.safe_substitute(**self._strings.get('__vars__'))
 
-  def config(self, name):
-    value = self._config
-    for part in name.split('.'):
-      value = value[part]
+  def config(self, name, default=NotImplemented):
+    try:
+      value = self._config
+      for part in name.split('.'):
+        value = value[part]
+    except KeyError:
+      if default is NotImplemented:
+        raise
+      value = default
     return value
 
   def cancel(self):
