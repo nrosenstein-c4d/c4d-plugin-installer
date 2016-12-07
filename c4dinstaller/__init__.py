@@ -296,7 +296,7 @@ class EndPage(_FormPage('page06end')):
     if not installThread or installThread.mode == InstallThread.Mode.Cancelled:
       text = self.ls('end.canceled')
     elif installThread.mode() == InstallThread.Mode.Error:
-      text = self.ls('end.failed')
+      text = self.ls('end.failure')
     else:
       text = self.ls('end.success')
     self.label.setText(text)

@@ -81,7 +81,7 @@ class InstallThread(QObject):
     self._lock = threading.Lock()
     self._mode = None
     self._installedFiles = None
-    self._createDirs = None
+    self._createdDirs = None
     self._slowdownProgress = slowdownProgress
 
   def _log(self, *objects, sep=' ', end='\n'):
@@ -121,8 +121,8 @@ class InstallThread(QObject):
         destdir = os.path.dirname(to)
         if not os.path.exists(destdir):
           self._log('Created directory:', destdir)
-          createdDirs.append(destdir)
           os.makedirs(destdir)
+          createdDirs.append(destdir)
         shutil.copyfile(from_, to)
         installedFiles.append(to)
         self._log('Installed file:', to)
