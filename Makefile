@@ -53,8 +53,8 @@ c4dinstaller/ui/%.py: ui/%.ui
 run: $(QTUI_LIBS)
 	PYTHONPATH="$(PYTHONPATH)" $(PYTHON) "bootstrapper.py"
 
-installer: bootstrapper.py bootstrapper.spec $(QTUI_LIBS)
-	PYTHONPATH="$(PYTHONPATH)" $(PYINSTALLER) bootstrapper.spec -y --uac-admin --onefile \
+installer: bootstrapper.py bootstrapper.spec bootstrapper.exe.manifest $(QTUI_LIBS)
+	PYTHONPATH="$(PYTHONPATH)" $(PYINSTALLER) bootstrapper.spec -y -m bootstrapper.exe.manifest --uac-admin --onefile \
 		--workpath "$(BUILD_DIR)/temp" --distpath "$(BUILD_DIR)/dist"
 
 clean-qtui:
