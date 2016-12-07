@@ -260,6 +260,7 @@ class InstallPage(_FormPage('page05install')):
       self.label.setText(self.ls('install.cancelled'))
     elif mode == InstallThread.Mode.Error:
       self.label.setText(self.ls('install.error'))
+      self.textView.setVisible(True)
     self.progressBar.setValue(progress * 100)
 
 

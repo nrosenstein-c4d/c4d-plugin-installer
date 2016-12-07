@@ -17,6 +17,7 @@
 from PyQt5.QtCore import *
 
 import os
+import shutil
 import time
 import threading
 import traceback
@@ -110,7 +111,10 @@ class InstallThread(QObject):
       for i, (from_, to) in enumerate(filelist):
         self.raiseCancelled()
         self._updateProgress(Mode.Copy, i / len(filelist))
-        # TODO: Actually copy the file
+        destdir = os.path.dirname(to)
+        if not os.path.exists(destdir):
+          os.makedirs(destdir)
+        shutil.copyfile(from_, to)
         self._log('Installed file: {}'.format(to))
       self._updateProgress(Mode.Copy, 1.0)
 
