@@ -133,6 +133,7 @@ class InstallThread(QObject):
       if self._dependencies:
         self._log('Installing dependencies ...')
       for i, dep in enumerate(self._dependencies):
+        self.raiseCancelled()
         self._updateProgress(Mode.Dependencies, i / len(self._dependencies))
         self._log('Installing dependency:', dep.name)
         self._log('  Command:', ' '.join(map(shlex.quote, dep.command)))
@@ -140,6 +141,9 @@ class InstallThread(QObject):
         if ret not in dep.returncodes:
           self._log('  Error: Unexpected returncode:', ret)
           raise InstallAborted
+        else:
+          self._log('  Returncode:', ret)
+      self.raiseCancelled()
 
       # Copy the source files to their target location.
       self._log('Copying {} files ...'.format(len(filelist)))
@@ -156,6 +160,7 @@ class InstallThread(QObject):
         self._log('Installed file:', to)
       self._updateProgress(Mode.Copy, 1.0)
       createdDirs.reverse()
+      self.raiseCancelled()
 
       # Create a file that lists up every file we created.
       if self._installedFilesListFn:
@@ -169,6 +174,7 @@ class InstallThread(QObject):
             print(filename, file=fp)
           self._updateProgress(Mode.FileList, 1.0)
 
+      self.raiseCancelled()
       self._log('Installation successful!')
     except Exception as exc:
       traceback.print_exc()
@@ -176,7 +182,7 @@ class InstallThread(QObject):
 
       if isinstance(exc, InstallCancelled):
         self._log("User cancelled installation.")
-      if isinstance(exc, InstallAborted):
+      elif isinstance(exc, InstallAborted):
         # Controlled abortion
         pass
       elif isinstance(exc, FileNotFoundError):
