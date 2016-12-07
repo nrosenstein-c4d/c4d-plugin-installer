@@ -136,6 +136,7 @@ class InstallThread(QObject):
           installedFiles.append(self._installedFilesListFn)
           writeFiles = installedFiles + createdDirs
           for i, filename in enumerate(writeFiles):
+            self.raiseCancelled()
             self._updateProgress(Mode.InstallInfo, i / len(writeFiles))
             print(filename, file=fp)
           self._updateProgress(Mode.InstallInfo, 1.0)
@@ -171,7 +172,7 @@ class InstallThread(QObject):
         else:
           self._log('Removed: {}'.format(path))
 
-      self._updateProgress(Mode.Cancelled if self.cancelled() else Mode.Error, 1.0)
+      self._updateProgress(Mode.Cancelled if self.cancelled() else Mode.Error, 0.0)
     else:
       self._updateProgress(Mode.Complete, 1.0)
     print("note: Installer thread ended")
@@ -186,12 +187,14 @@ class InstallThread(QObject):
       except:
         traceback.print_exc()
 
-  def cancel(self, join=True):
+  def mode(self):
     with self._lock:
-      self._canceled = True
+      return self._mode
+
+  def cancel(self):
+    with self._lock:
+      self._cancelled = True
       self._running = False
-    if join:
-      self._thread.join()
 
   def cancelled(self):
     with self._lock:
@@ -200,6 +203,10 @@ class InstallThread(QObject):
   def raiseCancelled(self):
     if self.cancelled():
       raise InstallCancelled()
+
+  def running(self):
+    with self._lock:
+      return self._running
 
   def start(self):
     with self._lock:

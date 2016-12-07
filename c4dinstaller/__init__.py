@@ -206,6 +206,7 @@ class TargetPage(_FormPage('page04target')):
 class InstallPage(_FormPage('page05install')):
 
   def initForm(self):
+    self.installThread = None
     self.initButtonBox('endPage')
 
     sp = self.textView.sizePolicy()
@@ -214,8 +215,19 @@ class InstallPage(_FormPage('page05install')):
     self.textView.setWordWrapMode(QTextOption.NoWrap)
     self.textView.setVisible(False)
 
+    self.buttonOk.setEnabled(False)
     self.buttonDetails.clicked.connect(self.on_detailsClicked)
     self.becomesVisible.connect(self.on_becomesVisible)
+
+  def askCancel(self):
+    if self.installThread and self.installThread.running():
+      response = QMessageBox.critical(self, 'Cancel Installation',
+          'Do you really want to cancel the installation?',
+          QMessageBox.Yes | QMessageBox.No)
+      if response == QMessageBox.Yes:
+        self.installThread.cancel()
+      return False
+    return True
 
   def on_detailsClicked(self):
     self.textView.setVisible(not self.textView.isVisible())
@@ -250,36 +262,40 @@ class InstallPage(_FormPage('page05install')):
     self.textView.setPlainText(self.installLog.getvalue())
 
   def on_progressUpdate(self, mode, progress):
-    if mode == InstallThread.Mode.Collect:
+    Mode = InstallThread.Mode
+    if mode == Mode.Collect:
       self.label.setText(self.ls('install.collect'))
-    elif mode == InstallThread.Mode.Copy:
+    elif mode == Mode.Copy:
       self.label.setText(self.ls('install.copy'))
-    elif mode == InstallThread.Mode.InstallInfo:
+    elif mode == Mode.InstallInfo:
       self.label.setText(self.ls('install.write-info'))
-    elif mode == InstallThread.Mode.Undo:
+    elif mode == Mode.Undo:
       self.label.setText(self.ls('install.undo'))
-    elif mode == InstallThread.Mode.Complete:
+    elif mode == Mode.Complete:
       self.label.setText(self.ls('install.complete'))
-    elif mode == InstallThread.Mode.Cancelled:
+    elif mode == Mode.Cancelled:
       self.label.setText(self.ls('install.cancelled'))
-    elif mode == InstallThread.Mode.Error:
+    elif mode == Mode.Error:
       self.label.setText(self.ls('install.error'))
       self.textView.setVisible(True)
+
+    if mode in (Mode.Complete, Mode.Cancelled, Mode.Error):
+      self.buttonOk.setEnabled(True)
+      self.buttonCancel.setEnabled(False)
     self.progressBar.setValue(progress * 100)
 
 
 class EndPage(_FormPage('page06end')):
 
   def initForm(self):
-    self.canceled = False
-    self.error = None
     self.initButtonBox()
     self.becomesVisible.connect(self.on_becomesVisible)
 
   def on_becomesVisible(self):
-    if self.canceled:
+    installThread = self.installer.installPage.installThread
+    if not installThread or installThread.mode == InstallThread.Mode.Cancelled:
       text = self.ls('end.canceled')
-    elif self.error:
+    elif installThread.mode() == InstallThread.Mode.Error:
       text = self.ls('end.failed')
     else:
       text = self.ls('end.success')
@@ -396,7 +412,9 @@ class Installer(ui.form('installer')):
 
   def cancel(self):
     print("info: called Installer.cancel()")
-    self.endPage.canceled = True
+    if not self.installPage.askCancel():
+      print("info: InstallPage says we need to wait a bit")
+      return
     self.setCurrentPage(self.endPage)
 
   def setCurrentPage(self, page=None, save=True):
@@ -407,6 +425,14 @@ class Installer(ui.form('installer')):
     print("info: switching to page:", page.objectName())
     self.stackedPages.setCurrentWidget(page)
     page.becomesVisible.emit()
+
+  # QWidget
+
+  def closeEvent(self, event):
+    if self.currentPage == self.installPage and not self.installPage.askCancel():
+      event.ignore()
+    else:
+      event.accept()
 
 
 def read_config():
