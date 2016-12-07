@@ -14,7 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import ctypes
 import os
+import subprocess
 import sys
 import traceback
 
@@ -47,8 +49,29 @@ if hasattr(sys, '_MEIPASS'):
 elif getattr(sys, 'frozen', False):
   fatal('frozen environment has no sys._MEIPASS')
 
-if __name__ == '__main__':
+
+def is_admin():
   try:
+    return os.getuid() == 0
+  except AttributeError:
+    return ctypes.windll.shell32.IsUserAnAdmin() != 0
+
+
+def main():
+  try:
+    if not is_admin():
+      if sys.platform.startswith('darwin'):
+        print('note: no admin privileges, using osascript ...')
+        cmd = [
+          '/usr/bin/osascript', '-e',
+          'do shell script "{} {} 2>&1" with administrator privileges'
+            .format(sys.executable, sys.argv[0])
+          ]
+        return subprocess.call(cmd)
+      elif sys.platform.startswith('win'):
+        print('note: no admin privileges, not sure what to do on windows!')
+        raise NotImplementedError('Admin switch not implemented on Windows')
+
     import c4dinstaller
     res = c4dinstaller.main()
   except Exception as exc:
@@ -57,3 +80,6 @@ if __name__ == '__main__':
     raise
   else:
     sys.exit(res)
+
+if __name__ == '__main__':
+  main()
