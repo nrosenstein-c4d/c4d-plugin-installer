@@ -18,16 +18,20 @@
     "presets": "$presets"
   },
   "install": {
-    "plugin": {
-      "$src/plugin/": "$c4d/plugins/C4DInstaller_ExamplePlugin/"
+    "slowdown": 0.5,
+    "filelist": "$c4d/plugins/C4DInstaller_ExamplePlugin/installed-files.txt",
+    "copyfiles": {
+      "plugin": {
+        "$src/plugin/": "$c4d/plugins/C4DInstaller_ExamplePlugin/"
+      },
+      "docs": {
+        "$src/doc/": "$c4d/plugins/C4DInstaller_ExamplePlugin/doc/"
+      },
+      "presets": {
+        "$src/library/": "$c4d/library/"
+      }
     },
-    "docs": {
-      "$src/doc/": "$c4d/plugins/C4DInstaller_ExamplePlugin/doc/"
-    },
-    "presets": {
-      "$src/library/": "$c4d/library/"
-    }
-  },
-  "installed_files_list": "$c4d/plugins/C4DInstaller_ExamplePlugin/installed-files.txt",
-  "install_slowdown": 0.2
+    "dependencies": [
+    ]
+  }
 }

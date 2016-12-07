@@ -17,14 +17,28 @@
 from PyQt5.QtCore import *
 
 import os
+import shlex
 import shutil
 import time
 import threading
 import traceback
+import subprocess
 
 
 class InstallCancelled(Exception):
   pass
+
+
+class InstallAborted(Exception):
+  pass
+
+
+class InstallDependency(object):
+
+  def __init__(self, name, command, returncodes):
+    self.name = name
+    self.command = command
+    self.returncodes = returncodes
 
 
 class InstallThread(QObject):
@@ -64,16 +78,18 @@ class InstallThread(QObject):
 
   class Mode:
     Collect = 'collect'
+    Dependencies = 'dependencies'
     Copy = 'copy'
+    FileList = 'filelist'
     Undo = 'undo'
-    InstallInfo = 'writing-install-info'
     Complete = 'complete'
     Cancelled = 'cancelled'
     Error = 'error'
 
-  def __init__(self, copyfiles, installedFilesListFn, slowdownProgress=None):
+  def __init__(self, copyfiles, dependencies, installedFilesListFn, slowdownProgress=None):
     super().__init__()
     self._copyfiles = copyfiles
+    self._dependencies = dependencies
     self._installedFilesListFn = installedFilesListFn
     self._running = False
     self._cancelled = False
@@ -113,6 +129,18 @@ class InstallThread(QObject):
         filelist += get_filelist(from_, to)
       self._updateProgress(Mode.Collect, 1.0)
 
+      # Install dependencies.
+      if self._dependencies:
+        self._log('Installing dependencies ...')
+      for i, dep in enumerate(self._dependencies):
+        self._updateProgress(Mode.Dependencies, i / len(self._dependencies))
+        self._log('Installing dependency:', dep.name)
+        self._log('  Command:', ' '.join(map(shlex.quote, dep.command)))
+        ret = subprocess.call(dep.command)
+        if ret not in dep.returncodes:
+          self._log('  Error: Unexpected returncode:', ret)
+          raise InstallAborted
+
       # Copy the source files to their target location.
       self._log('Copying {} files ...'.format(len(filelist)))
       for i, (from_, to) in enumerate(filelist):
@@ -137,9 +165,9 @@ class InstallThread(QObject):
           writeFiles = installedFiles + createdDirs
           for i, filename in enumerate(writeFiles):
             self.raiseCancelled()
-            self._updateProgress(Mode.InstallInfo, i / len(writeFiles))
+            self._updateProgress(Mode.FileList, i / len(writeFiles))
             print(filename, file=fp)
-          self._updateProgress(Mode.InstallInfo, 1.0)
+          self._updateProgress(Mode.FileList, 1.0)
 
       self._log('Installation successful!')
     except Exception as exc:
@@ -148,14 +176,18 @@ class InstallThread(QObject):
 
       if isinstance(exc, InstallCancelled):
         self._log("User cancelled installation.")
+      if isinstance(exc, InstallAborted):
+        # Controlled abortion
+        pass
       elif isinstance(exc, FileNotFoundError):
         self._log('Error: file could not be found:', exc)
       else:
         self._log('Error:', exc)
 
       # Try to undo all installed files and created directories.
-      self._log('Removing already installed files ...')
       pathsToRemove = installedFiles + createdDirs
+      if pathsToRemove:
+        self._log('Removing already installed files ...')
       for i, path in enumerate(pathsToRemove):
         self._updateProgress(Mode.Undo, 1.0 - i / len(pathsToRemove))
         try:

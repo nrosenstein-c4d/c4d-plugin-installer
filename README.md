@@ -113,29 +113,50 @@ installation path (that is usually the Cinema 4D root directory).
 
 ```json
   "install": {
-    "plugin": {
-      "$src/plugin/": "$c4d/plugins/C4DInstaller_ExamplePlugin/"
+    "slowdown": 0.5,
+    "filelist": "$c4d/plugins/C4DInstaller_ExamplePlugin/installed-files.txt",
+    "copyfiles": {
+      "plugin": {
+        "$src/plugin/": "$c4d/plugins/C4DInstaller_ExamplePlugin/"
+      },
+      "docs": {
+        "$src/doc/": "$c4d/plugins/C4DInstaller_ExamplePlugin/doc/"
+      },
+      "presets": {
+        "$src/library/": "$c4d/library/"
+      }
     },
-    "docs": {
-      "$src/doc/": "$c4d/plugins/C4DInstaller_ExamplePlugin/doc/"
-    },
-    "presets": {
-      "$src/library/": "$c4d/library/"
-    }
-  },
-  "installed_files_list": "$c4d/plugins/C4DInstaller_ExamplePlugin/installed-files.txt",
-  "install_slowdown": null
+    "dependencies": [
+    ]
+  }
 ```
 
-The `"installed_files_list"` is the file that will be created after all files
+The `"filelist"` is the file that will be created after all files
 have been copied. This file lists up all files and directories that have been
 created by the installer. Directories are listed at the end of the file in the
 order they can be removed from the bottom up.
 
-For testing purposes, you may choose a number in seconds for
-`"install_slowdown"`. This is the time that will be waited after each update
-to the installation progress to slow down and make it easier to track what's
-happening.
+For testing purposes, you may choose a number in seconds for `"slowdown"`.
+This is the time that will be waited after each update to the installation
+progress to slow down and make it easier to track what's happening.
+
+The `"dependencies"` section is used to specify additional installers that
+need to be installed for the plugin to function. Variable substition is
+supported in the `"name"`, `"file"` and `"args"` fields. The fields `"returncode"`
+and `"args"` are optional. Valid values for `"platform"` are `"windows"` and
+`"osx"`. **Example:**
+
+```json
+    "dependencies": [
+      {
+        "name": "MSVC++ 2015 Redistributable (x64) - 14.0.23026",
+        "platform": "windows",
+        "file": "$src/redist/windows/vc_redist-2015-14.0.23026-x64.exe",
+        "args": ["/install"],
+        "returncodes": [0, 1638]
+      }
+    ]
+```
 
 #### EULA
 

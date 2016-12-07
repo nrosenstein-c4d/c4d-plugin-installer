@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import ui
-from .installthread import InstallThread
+from .installthread import InstallThread, InstallDependency
 from .utils import c4dfinder
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -27,6 +27,13 @@ import json
 import string
 import sys
 import os
+
+if sys.platform.startswith('win'):
+  PLATFORM = 'windows'
+elif sys.platform.startswith('mac'):
+  PLATFORM = 'osx'
+else:
+  raise EnvironmentError('unsupported platform: {}'.format(sys.platform))
 
 
 class _PageBase(object):
@@ -239,20 +246,32 @@ class InstallPage(_FormPage('page05install')):
       self.installer.cancel()
       return
 
-    copyfiles = []
-    for feature in self.installer.featuresPage.iterFeatures():
-      if feature.checkState() == Qt.Checked:
-        copyfiles += self.installer.config('install.' + feature.ident()).items()
-
     # Expand variables in the copyfiles list.
     vars = {'c4d': targetPath, 'src': os.path.abspath('data/install')}
     def render(x): return string.Template(x).substitute(**vars)
+
+    copyfiles = []
+    for feature in self.installer.featuresPage.iterFeatures():
+      if feature.checkState() == Qt.Checked:
+        copyfiles += self.installer.config('install.copyfiles.' + feature.ident()).items()
     copyfiles = [(render(s), render(d)) for (s, d) in copyfiles]
-    installedFilesListFn = render(self.config('installed_files_list') or '')
-    slowdownProgress = self.config('install_slowdown')
+
+    dependencies = []
+    for dep in self.config('install.dependencies'):
+      name = render(dep['name'])
+      if dep['platform'] != PLATFORM:
+        print('note: skipping dependency:', name)
+        continue
+      cmd = list(map(render, [dep['file']] + dep.get('args', [])))
+      ret = dep.get('returncodes', [0])
+      dep = InstallDependency(name, cmd, ret)
+      dependencies.append(dep)
+
+    installedFilesListFn = render(self.config('install.filelist') or '')
+    slowdownProgress = self.config('install.slowdown')
 
     self.installLog = io.StringIO()
-    self.installThread = InstallThread(copyfiles, installedFilesListFn, slowdownProgress)
+    self.installThread = InstallThread(copyfiles, dependencies, installedFilesListFn, slowdownProgress)
     self.installThread.logUpdate.connect(self.on_logUpdate, Qt.QueuedConnection)
     self.installThread.progressUpdate.connect(self.on_progressUpdate, Qt.QueuedConnection)
     self.installThread.start()
@@ -265,10 +284,12 @@ class InstallPage(_FormPage('page05install')):
     Mode = InstallThread.Mode
     if mode == Mode.Collect:
       self.label.setText(self.ls('install.collect'))
+    elif mode == Mode.Dependencies:
+      self.label.setText(self.ls('install.dependencies'))
     elif mode == Mode.Copy:
       self.label.setText(self.ls('install.copy'))
-    elif mode == Mode.InstallInfo:
-      self.label.setText(self.ls('install.write-info'))
+    elif mode == Mode.FileList:
+      self.label.setText(self.ls('install.filelist'))
     elif mode == Mode.Undo:
       self.label.setText(self.ls('install.undo'))
     elif mode == Mode.Complete:
