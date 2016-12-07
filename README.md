@@ -120,8 +120,20 @@ installation path (that is usually the Cinema 4D root directory).
     "presets": {
       "$src/library/": "$c4d/library/"
     }
-  }
+  },
+  "installed_files_list": "$c4d/plugins/C4DInstaller_ExamplePlugin/installed-files.txt",
+  "install_slowdown": null
 ```
+
+The `"installed_files_list"` is the file that will be created after all files
+have been copied. This file lists up all files and directories that have been
+created by the installer. Directories are listed at the end of the file in the
+order they can be removed from the bottom up.
+
+For testing purposes, you may choose a number in seconds for
+`"install_slowdown"`. This is the time that will be waited after each update
+to the installation progress to slow down and make it easier to track what's
+happening.
 
 #### EULA
 

@@ -236,9 +236,11 @@ class InstallPage(_FormPage('page05install')):
     vars = {'c4d': targetPath, 'src': os.path.abspath('data/install')}
     def render(x): return string.Template(x).substitute(**vars)
     copyfiles = [(render(s), render(d)) for (s, d) in copyfiles]
+    installedFilesListFn = render(self.config('installed_files_list') or '')
+    slowdownProgress = self.config('install_slowdown')
 
     self.installLog = io.StringIO()
-    self.installThread = InstallThread(copyfiles)
+    self.installThread = InstallThread(copyfiles, installedFilesListFn, slowdownProgress)
     self.installThread.logUpdate.connect(self.on_logUpdate, Qt.QueuedConnection)
     self.installThread.progressUpdate.connect(self.on_progressUpdate, Qt.QueuedConnection)
     self.installThread.start()
@@ -252,6 +254,8 @@ class InstallPage(_FormPage('page05install')):
       self.label.setText(self.ls('install.collect'))
     elif mode == InstallThread.Mode.Copy:
       self.label.setText(self.ls('install.copy'))
+    elif mode == InstallThread.Mode.InstallInfo:
+      self.label.setText(self.ls('install.write-info'))
     elif mode == InstallThread.Mode.Undo:
       self.label.setText(self.ls('install.undo'))
     elif mode == InstallThread.Mode.Complete:

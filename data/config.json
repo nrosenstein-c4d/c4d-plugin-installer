@@ -25,5 +25,7 @@
     "presets": {
       "$src/library/": "$c4d/library/"
     }
-  }
+  },
+  "installed_files_list": "$c4d/plugins/C4DInstaller_ExamplePlugin/installed-files.txt",
+  "install_slowdown": null
 }

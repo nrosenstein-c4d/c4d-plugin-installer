@@ -18,6 +18,7 @@
   "target.path": "Path:",
   "install.collect": "Collecting files to install ...",
   "install.copy": "Copying files ...",
+  "install.write-info": "Writing install info ...",
   "install.undo": "Reverting installation ...",
   "install.error": "Installation failed",
   "install.cancelled": "Installation cancelled",

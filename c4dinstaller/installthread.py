@@ -66,19 +66,23 @@ class InstallThread(QObject):
     Collect = 'collect'
     Copy = 'copy'
     Undo = 'undo'
+    InstallInfo = 'writing-install-info'
     Complete = 'complete'
     Cancelled = 'cancelled'
     Error = 'error'
 
-  def __init__(self, copyfiles):
+  def __init__(self, copyfiles, installedFilesListFn, slowdownProgress=None):
     super().__init__()
     self._copyfiles = copyfiles
+    self._installedFilesListFn = installedFilesListFn
     self._running = False
     self._cancelled = False
     self._thread = None
     self._lock = threading.Lock()
     self._mode = None
     self._installedFiles = None
+    self._createDirs = None
+    self._slowdownProgress = slowdownProgress
 
   def _log(self, *objects, sep=' ', end='\n'):
     message = sep.join(map(str, objects)) + end
@@ -91,11 +95,14 @@ class InstallThread(QObject):
     if mode is not None:
       self._mode = mode
     self.progressUpdate.emit(mode, progress)
+    if self._slowdownProgress is not None:
+      time.sleep(self._slowdownProgress)
 
-  def _run(self):
+  def _run_internal(self):
     Mode = self.Mode
     filelist = []
     installedFiles = self._installedFiles = []
+    createdDirs = self._createdDirs = []
 
     try:
       # Generate a list of all source and target files.
@@ -113,10 +120,25 @@ class InstallThread(QObject):
         self._updateProgress(Mode.Copy, i / len(filelist))
         destdir = os.path.dirname(to)
         if not os.path.exists(destdir):
+          self._log('Created directory:', destdir)
+          createdDirs.append(destdir)
           os.makedirs(destdir)
         shutil.copyfile(from_, to)
-        self._log('Installed file: {}'.format(to))
+        installedFiles.append(to)
+        self._log('Installed file:', to)
       self._updateProgress(Mode.Copy, 1.0)
+      createdDirs.reverse()
+
+      # Create a file that lists up every file we created.
+      if self._installedFilesListFn:
+        self._log("Writing install information to:", self._installedFilesListFn)
+        with open(self._installedFilesListFn, 'w') as fp:
+          installedFiles.append(self._installedFilesListFn)
+          writeFiles = installedFiles + createdDirs
+          for i, filename in enumerate(writeFiles):
+            self._updateProgress(Mode.InstallInfo, i / len(writeFiles))
+            print(filename, file=fp)
+          self._updateProgress(Mode.InstallInfo, 1.0)
 
       self._log('Installation successful!')
     except Exception as exc:
@@ -130,21 +152,39 @@ class InstallThread(QObject):
       else:
         self._log('Error:', exc)
 
-      # Try to undo all installed files.
+      # Try to undo all installed files and created directories.
       self._log('Removing already installed files ...')
-      for i, filename in enumerate(installedFiles):
-        self._updateProgress(Mode.Undo, 1.0 - i / len(installedFiles))
+      pathsToRemove = installedFiles + createdDirs
+      for i, path in enumerate(pathsToRemove):
+        self._updateProgress(Mode.Undo, 1.0 - i / len(pathsToRemove))
         try:
-          os.remove(filename)
+          # Directories are listed at the end, so if they are empty
+          # we can safely remove them!
+          # note: safeguard if rmdir() on any platform would remove a
+          #       directory recursively
+          if os.path.isdir(path) and not os.listdir(path):
+            os.rmdir(path)
+          else:
+            os.remove(path)
         except OSError as exc:
-          self._log('Error: Could not remove file: {}'.format(filename))
+          self._log('Error: Could not remove: {}'.format(path))
         else:
-          self._log('Removed file: {}'.format(filename))
+          self._log('Removed: {}'.format(path))
 
       self._updateProgress(Mode.Cancelled if self.cancelled() else Mode.Error, 1.0)
     else:
       self._updateProgress(Mode.Complete, 1.0)
     print("note: Installer thread ended")
+
+  def _run(self):
+    try:
+      self._run_internal()
+    except:
+      try:
+        self._log(traceback.format_exc())
+        self._updateProgress(self.Mode.Error, 1.0)
+      except:
+        traceback.print_exc()
 
   def cancel(self, join=True):
     with self._lock:
