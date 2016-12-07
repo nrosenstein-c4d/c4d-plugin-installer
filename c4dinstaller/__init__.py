@@ -150,7 +150,7 @@ class FeaturesPage(_FormPage('page03features')):
 
       item = self.Feature(ident, self.ls(subst=name))
       item.setFlags(flags)
-      item.setCheckState(Qt.Checked if is_main_feature else Qt.Unchecked)
+      item.setCheckState(Qt.Checked)
       self.listWidget.addItem(item)
 
     self.becomesVisible.connect(self.on_becomesVisible)
@@ -207,9 +207,13 @@ class InstallPage(_FormPage('page05install')):
 
   def initForm(self):
     self.initButtonBox('endPage')
+
     sp = self.textView.sizePolicy()
     sp.setRetainSizeWhenHidden(True)
     self.textView.setSizePolicy(sp)
+    self.textView.setWordWrapMode(QTextOption.NoWrap)
+    self.textView.setVisible(False)
+
     self.buttonDetails.clicked.connect(self.on_detailsClicked)
     self.becomesVisible.connect(self.on_becomesVisible)
 
