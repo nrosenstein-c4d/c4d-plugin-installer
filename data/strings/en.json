@@ -1,6 +1,6 @@
 {
   "__vars__": {
-    "plugin": "Cinema 4D Plugin",
+    "plugin": "V-Ray For Cinema 4D",
     "documentation": "Documentation",
     "presets": "Preset Files"
   },
@@ -13,7 +13,7 @@
   "about.label": "About this Application",
   "welcome.label": "Welcome to the $plugin Setup.",
   "eula.label": "End User License Agreement",
-  "features.label": "Select the features to install",
+  "features.label": "Select the $plugin features to install",
   "target.label": "Select a Cinema 4D target installation",
   "target.path": "Path:",
   "install.collect": "Collecting files to install ...",

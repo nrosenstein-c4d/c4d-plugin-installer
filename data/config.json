@@ -1,7 +1,7 @@
 {
   "installer": {
-    "name": "C4DPluginInstaller",
-    "bundle_identifier": "com.niklasrosenstein.c4dinstaller"
+    "name": "VrayBridgeInstaller",
+    "bundle_identifier": "com.laublab.vraybridgeinstaller"
   },
   "uninstaller": {
     "enabled": true,
@@ -27,16 +27,35 @@
     "slowdown": 0.5,
     "copyfiles": {
       "plugin": {
-        "$src/plugin/": "$c4d/plugins/C4DInstaller_ExamplePlugin/"
+        "$src/plugin/": "$c4d/plugins/VrayForC4D/"
       },
       "docs": {
-        "$src/doc/": "$c4d/plugins/C4DInstaller_ExamplePlugin/doc/"
+        "$src/doc/": "$c4d/plugins/VrayForC4D/doc/"
       },
       "presets": {
         "$src/library/": "$c4d/library/"
       }
     },
     "dependencies": [
+      {
+        "name": "MSVC++ 2015 Redistributable (x64) - 14.0.23026",
+        "platform": "windows",
+        "file": "$src/redist/vc_redist-2015-14.0.23026-x64.exe",
+        "args": ["/passive", "/install"],
+        "returncodes": [0, 1638]
+      },
+      {
+        "name": "Intel(R) C++ Redistributables on Intel(R) 64 (2017.0.109)",
+        "platform": "windows",
+        "file": "cmd",
+        "args": ["/c", "$src/redist/ww_icl_redist_intel64_2017.0.109.msi", "/passive"]
+      },
+      {
+        "name": "Intel(R) C++ Redistributables on Intel(R) 64 (2017.1.143)",
+        "platform": "windows",
+        "file": "cmd",
+        "args": ["/c", "$src/redist/ww_icl_redist_intel64_2017.1.143.msi", "/passive"]
+      }
     ]
   }
 }
