@@ -9,10 +9,9 @@
 Easily create an installer for your Cinema 4D plugin for Windows and Mac OS.
 Replace the banner and icon, update some configuration, build & done.
 
-## Todo
+Check out the [Milestones] page for what's still to do.
 
-- [x] Install-page logic (collecting & copying files)
-- [ ] Install-page cancel and next button behaviour
+[Milestones]: https://github.com/nr-plugins/installer/milestones
 
 ## Requirements
 
