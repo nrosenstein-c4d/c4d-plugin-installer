@@ -48,11 +48,17 @@ you need to specify the following information:
   OSX bundle identifier.
 - Features that will be displayed in the "Features" page of the installer.
   Note that if no features are configured, the page will not be displayed.
+- The files that need to be copied for each feature and where they need to
+  be copied to.
+
+#### Text
 
 The strings that are displayed in the dialog are defined in
 [data/strings/en.json]. In every string you can use variables in the format
 `$varname` or `${varname}`. These variables are defined in the `"__vars__"`
 section of the same string file.
+
+#### Feature Configuration
 
 Note that these variables are also supported in the `"features"` object
 in [data/config.json]. The demo configuration contains the following feature
@@ -73,11 +79,38 @@ variables in the string file. The `!` prefix makes the feature always enabled
 and prevents the user from turning it of (used for the "main" feature that
 is always required).
 
+#### Install Configuration
+
+Files that are to be installed should be placed into the [data/install]
+directory. By default, there's a sample Python plugin, a material preview
+preset and a plugin documentation file (respective to the default features).
+
+The `"install"` section lists which files or directoriees are to be copied
+where in the Cinema 4D application directory. The variables `$src` and `$c4d`
+are available respectively to reference the [data/install] directory and the
+installation path (that is usually the Cinema 4D root directory).
+
+```json
+  "install": {
+    "plugin": {
+      "$src/plugin/": "$c4d/plugins/C4DInstaller_ExamplePlugin/"
+    },
+    "docs": {
+      "$src/doc/": "$c4d/plugins/C4DInstaller_ExamplePlugin/doc/"
+    },
+    "presets": {
+      "$src/library/": "$c4d/library/"
+    }
+  }
+```
+
+#### EULA
+
 The EULA can be in [data/eula.txt] and should be updated before building the
 installer. If you don't want to display an EULA, you can delete the file
 entirely.
 
-*Todo: describe `"install"` section*
+#### Summary
 
 To summarise, these are the steps to configure the installer:
 
@@ -89,8 +122,9 @@ To summarise, these are the steps to configure the installer:
 5. Test and build the installer
 
 [data/config.json]: data/config.json
-[data/eula.txt]: data/config.json
 [data/strings/en.json]: data/strings/en.json
+[data/install]: data/config.json
+[data/eula.txt]: data/config.json
 
 ## Testing
 
