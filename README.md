@@ -4,11 +4,16 @@ This repository provides a customizable installer for Cinema 4D plugins based
 on CPython 3, PyInstaller and PyQt5. It is licensed under GPL to abide the
 PyQt5 license requirements.
 
-![Installer Screenshots](http://i.imgur.com/O2sHbqn.jpg)
+<p align="center">
+  <a title="Go to the video" href="http://i.imgur.com/kIHBFmq.mp4">
+    <img alt="Installer Preview" src="http://i.imgur.com/jwzZKsU.png"/>
+  </a>
+</p>
 
 Todolist:
 
-- [ ] Install-page logic (collecting & copying files)
+- [x] Install-page logic (collecting & copying files)
+- [ ] Install-page cancel and next button behaviour
 
 ## Requirements
 
