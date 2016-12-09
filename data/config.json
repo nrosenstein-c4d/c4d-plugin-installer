@@ -1,7 +1,6 @@
 {
   "installer": {
     "name": "C4DPluginInstaller",
-    "uninstaller_name": "uninstaller",
     "bundle_identifier": "com.niklasrosenstein.c4dinstaller"
   },
   "uninstaller": {
