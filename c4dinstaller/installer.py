@@ -303,6 +303,7 @@ class Installer(BaseInstaller):
     self.stackedPages.addWidget(self.installPage)
     self.stackedPages.addWidget(self.endPage)
 
+    self.setWindowTitle(self.ls('installer.title'))
     self.setCurrentPage(self.welcomePage)
     super().initForm()
 

@@ -78,7 +78,6 @@ class BaseInstaller(ui.form('installer')):
 
   def initForm(self):
     self.setWindowFlags(Qt.Window)
-    self.setWindowTitle(self.ls('installer.title'))
     self.bannerLayout.setSpacing(0)
     self.bannerLeft.setPixmap(QPixmap("data/image/banner_01.png"))
     self.bannerMiddle.setPixmap(QPixmap("data/image/banner_02.png"))

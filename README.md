@@ -9,6 +9,7 @@
   <td><img src="https://i.imgur.com/jM9GU4r.png"/></td>
   <td><img src="https://i.imgur.com/hX57pCP.png"/></td>
   <td><img src="https://i.imgur.com/od3FLgX.png"/></td>
+  <td><img src="https://i.imgur.com/2UCFRNX.png"/></td>
 </tr></table>
 
 Easily create an installer for your Cinema 4D plugin for Windows and Mac OS.
@@ -20,10 +21,10 @@ Check out the [Milestones] page for what's still to do.
 
 ## Features
 
-- Very customisable
-- Finds available Cinema 4D installations
-- Undo's changes on installation errors
-- Option to install an uninstaller
+- [x] Very customisable
+- [x] Automatically finds available Cinema 4D installations on the system
+- [x] Supports installing dependencies from redistributable installers
+- [x] Optional Uninstaller
 
 ## Requirements
 

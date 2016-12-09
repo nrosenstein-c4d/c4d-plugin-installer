@@ -65,5 +65,6 @@ class Uninstaller(BaseInstaller):
       self.stackedPages.addWidget(self.welcomePage)
       self.stackedPages.addWidget(self.uninstallPage)
 
+      self.setWindowTitle(self.ls('uninstall.title'))
       self.setCurrentPage(self.welcomePage)
       super().initForm()
