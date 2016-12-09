@@ -19,6 +19,12 @@ import sys
 import json
 import fnmatch
 
+def match_patterns(name, patterns):
+  for pattern in patterns:
+    if fnmatch.fnmatch(name, pattern):
+      return True
+  return False
+
 def recursive_data_files(path, target_dir, exclude=()):
   result = []
   path = os.path.abspath(path)
@@ -28,7 +34,7 @@ def recursive_data_files(path, target_dir, exclude=()):
       arcdir = target_dir
     else:
       arcdir = os.path.join(target_dir, arcdir)
-    if any(fnmatch.fnmatch(arcdir, p) for p in exclude):
+    if match_patterns(arcdir, exclude):
       continue
     for filename in files:
       result.append((os.path.join(root, filename), arcdir))
@@ -51,7 +57,8 @@ print('-'*80)
 installer_icon = "data/image/icon.ico" if not is_mac else "data/image/icon.icns"
 block_cipher = None
 
-datas = recursive_data_files('data', 'data', exclude = [] if is_installer else ['data/install/*'])
+datas = recursive_data_files('data', 'data',
+  exclude = [] if is_installer else ['data/install*', 'data/uninstaller*'])
 
 a = Analysis(['bootstrapper.py'],
   pathex = [os.getcwd()],
