@@ -26,5 +26,8 @@
   "install.complete": "Installation finished",
   "end.success": "Installation successful",
   "end.failure": "Installation failed",
-  "end.canceled": "Installation canceled"
+  "end.canceled": "Installation canceled",
+  "uninstall.welcome": "Uninstall $plugin?",
+  "uninstall.processing": "Uninstalling $plugin ...",
+  "uninstall.done": "$plugin uninstalled"
 }
