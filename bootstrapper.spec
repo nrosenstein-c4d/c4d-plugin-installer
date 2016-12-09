@@ -17,8 +17,9 @@
 import os
 import sys
 import json
+import fnmatch
 
-def recursive_data_files(path, target_dir):
+def recursive_data_files(path, target_dir, exclude=()):
   result = []
   path = os.path.abspath(path)
   for root, dirs, files in os.walk(path):
@@ -27,6 +28,9 @@ def recursive_data_files(path, target_dir):
       arcdir = target_dir
     else:
       arcdir = os.path.join(target_dir, arcdir)
+    if any(fnmatch.fnmatch(arcdir, p) for p in exclude):
+      print("> ignoring arcdir:", arcdir)
+      continue
     for filename in files:
       result.append((os.path.join(root, filename), arcdir))
   return result
@@ -41,32 +45,41 @@ installer_name = config['name']
 installer_icon = "data/image/icon.ico" if not is_mac else "data/image/icon.icns"
 block_cipher = None
 
-a = Analysis(['bootstrapper.py'],
-  pathex = [os.getcwd()],
-  binaries = None,
-  datas = recursive_data_files('data', 'data'),
-  hiddenimports = ['c4dinstaller.ui.' + x[:-3] for x in os.listdir('c4dinstaller/ui')],
-  hookspath = [],
-  runtime_hooks = [],
-  excludes = [],
-  win_no_prefer_redirects = False,
-  win_private_assemblies = False,
-  cipher = block_cipher)
+def build_spec(name, is_installer):
+  datas = recursive_data_files('data', 'data', exclude = [] if is_installer else ['data/install/*'])
+  print()
+  print("is_installer:", is_installer)
+  print()
 
-pyz = PYZ(a.pure, a.zipped_data, cipher = block_cipher)
+  a = Analysis(['bootstrapper.py'],
+    pathex = [os.getcwd()],
+    binaries = None,
+    datas = datas,
+    hiddenimports = ['c4dinstaller.ui.' + x[:-3] for x in os.listdir('c4dinstaller/ui')],
+    hookspath = [],
+    runtime_hooks = [] if is_installer else ['uninstaller-hook.py'],
+    excludes = [],
+    win_no_prefer_redirects = False,
+    win_private_assemblies = False,
+    cipher = block_cipher)
 
-exe = EXE(pyz, a.scripts, a.binaries, a.zipfiles, a.datas,
-  name = installer_name,
-  debug = False,
-  strip = False,
-  upx = False,
-  console = True,
-  uac_admin = True,
-  icon = installer_icon)
+  pyz = PYZ(a.pure, a.zipped_data, cipher = block_cipher)
 
-if is_mac:
-  app = BUNDLE(exe,
-    name = installer_name + '.app',
-    icon = installer_icon,
-    bundle_identifier = config['bundle_identifier'],
-    upx = False)
+  exe = EXE(pyz, a.scripts, a.binaries, a.zipfiles, a.datas,
+    name = name,
+    debug = False,
+    strip = False,
+    upx = False,
+    console = True,
+    uac_admin = True,
+    icon = installer_icon)
+
+  if is_mac:
+    app = BUNDLE(exe,
+      name = name + '.app',
+      icon = installer_icon,
+      bundle_identifier = config['bundle_identifier'],
+      upx = False)
+
+build_spec(installer_name, True)
+build_spec('uninstall', False)

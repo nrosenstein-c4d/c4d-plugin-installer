@@ -330,7 +330,7 @@ class EndPage(_FormPage('page06end')):
     self.label.setText(text)
 
 
-class Installer(ui.form('installer')):
+class BaseInstaller(ui.form('installer')):
 
   def __init__(self, config, strings, parent=None):
     self._config = config
@@ -338,6 +338,7 @@ class Installer(ui.form('installer')):
     super().__init__(parent)
 
   def initForm(self):
+    self.currentPage = None
     self.setWindowFlags(Qt.Window)
     self.setWindowTitle(self.ls('installer.title'))
     self.bannerLayout.setSpacing(0)
@@ -345,24 +346,6 @@ class Installer(ui.form('installer')):
     self.bannerMiddle.setPixmap(QPixmap("data/image/banner_02.png"))
     self.bannerRight.setPixmap(QPixmap("data/image/banner_03.png"))
     self.setWindowIcon(QIcon("data/image/icon.ico"))
-
-    self.aboutPage = AboutPage(self)
-    self.welcomePage = WelcomePage(self)
-    self.eulaPage = EulaPage(self)
-    self.featuresPage = FeaturesPage(self)
-    self.targetPage = TargetPage(self)
-    self.installPage = InstallPage(self)
-    self.endPage = EndPage(self)
-
-    self.stackedPages.addWidget(self.aboutPage)
-    self.stackedPages.addWidget(self.welcomePage)
-    self.stackedPages.addWidget(self.eulaPage)
-    self.stackedPages.addWidget(self.featuresPage)
-    self.stackedPages.addWidget(self.targetPage)
-    self.stackedPages.addWidget(self.installPage)
-    self.stackedPages.addWidget(self.endPage)
-
-    self.setCurrentPage(self.welcomePage)
     self.initStyle()
 
   def initStyle(self):
@@ -445,13 +428,6 @@ class Installer(ui.form('installer')):
       value = default
     return value
 
-  def cancel(self):
-    print("info: called Installer.cancel()")
-    if not self.installPage.askCancel():
-      print("info: InstallPage says we need to wait a bit")
-      return
-    self.setCurrentPage(self.endPage)
-
   def setCurrentPage(self, page=None, save=True):
     if page is None:
       page = self.currentPage
@@ -461,6 +437,36 @@ class Installer(ui.form('installer')):
     self.stackedPages.setCurrentWidget(page)
     page.becomesVisible.emit()
 
+
+class Installer(BaseInstaller):
+
+  def initForm(self):
+    self.aboutPage = AboutPage(self)
+    self.welcomePage = WelcomePage(self)
+    self.eulaPage = EulaPage(self)
+    self.featuresPage = FeaturesPage(self)
+    self.targetPage = TargetPage(self)
+    self.installPage = InstallPage(self)
+    self.endPage = EndPage(self)
+
+    self.stackedPages.addWidget(self.aboutPage)
+    self.stackedPages.addWidget(self.welcomePage)
+    self.stackedPages.addWidget(self.eulaPage)
+    self.stackedPages.addWidget(self.featuresPage)
+    self.stackedPages.addWidget(self.targetPage)
+    self.stackedPages.addWidget(self.installPage)
+    self.stackedPages.addWidget(self.endPage)
+
+    self.setCurrentPage(self.welcomePage)
+    super().initForm()
+
+  def cancel(self):
+    print("info: called Installer.cancel()")
+    if not self.installPage.askCancel():
+      print("info: InstallPage says we need to wait a bit")
+      return
+    self.setCurrentPage(self.endPage)
+
   # QWidget
 
   def closeEvent(self, event):
@@ -468,6 +474,10 @@ class Installer(ui.form('installer')):
       event.ignore()
     else:
       event.accept()
+
+
+class Uninstaller(BaseInstaller):
+  pass
 
 
 def read_config():
@@ -484,6 +494,10 @@ def read_strings(lang_code='en'):
 
 def main():
   app = QApplication(sys.argv)
-  wnd = Installer(read_config(), read_strings())
+  if os.getenv('C4DINSTALLER_UNINSTALLER', '') == 'true':
+    wnd_class = Uninstaller
+  else:
+    wnd_class = Installer
+  wnd = wnd_class(read_config(), read_strings())
   wnd.show()
   return app.exec_()

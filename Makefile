@@ -53,6 +53,9 @@ c4dinstaller/ui/%.py: ui/%.ui
 run: $(QTUI_LIBS)
 	PYTHONPATH="$(PYTHONPATH)" $(PYTHON) "bootstrapper.py"
 
+run-uninstaller: $(QTUI_LIBS)
+	PYTHONPATH="$(PYTHONPATH)" $(PYTHON) "uninstaller-hook.py"
+
 installer: bootstrapper.py bootstrapper.spec bootstrapper.exe.manifest $(QTUI_LIBS)
 	PYTHONPATH="$(PYTHONPATH)" $(PYINSTALLER) bootstrapper.spec -y -m bootstrapper.exe.manifest --uac-admin --onefile \
 		--workpath "$(BUILD_DIR)/temp" --distpath "$(BUILD_DIR)/dist"
