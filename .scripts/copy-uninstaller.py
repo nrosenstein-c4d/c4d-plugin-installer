@@ -13,10 +13,24 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+This script is run after the uninstaller is built to copy it into the
+data/uninstaller directory.
+"""
 
-import os, sys, runpy
-os.environ['UNINSTALLER'] = 'true'
+import os
+import json
+import shutil
 
-if not getattr(sys, 'frozen', False):
-  # Not in PyInstaller, run bootstrap.py now.
-  runpy.run_path('bootstrapper.py', run_name='__main__')
+with open('data/config.json') as fp:
+  config = json.load(fp)
+
+name = config['uninstaller']['name'] + ('.exe' if os.name == 'nt' else '.app')
+source = os.path.join('build/dist', name)
+dest = os.path.join('data/uninstaller', name)
+
+print("Copying {} to {} ...".format(source, dest))
+dirname = os.path.dirname(dest)
+if not os.path.isdir(dirname):
+  os.makedirs(dirname)
+shutil.copyfile(source, dest)

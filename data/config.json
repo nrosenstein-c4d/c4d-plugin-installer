@@ -1,7 +1,14 @@
 {
   "installer": {
     "name": "C4DPluginInstaller",
+    "uninstaller_name": "uninstaller",
     "bundle_identifier": "com.niklasrosenstein.c4dinstaller"
+  },
+  "uninstaller": {
+    "enabled": true,
+    "target_directory": "$c4d/plugins/C4DInstaller_ExamplePlugin/",
+    "name": "uninstall",
+    "bundle_identifier": "com.niklasrosenstein.c4dinstaller_uninstaller"
   },
   "palette": {
     "background": [40, 40, 40],
@@ -19,7 +26,6 @@
   },
   "install": {
     "slowdown": 0.5,
-    "filelist": "$c4d/plugins/C4DInstaller_ExamplePlugin/installed-files.txt",
     "copyfiles": {
       "plugin": {
         "$src/plugin/": "$c4d/plugins/C4DInstaller_ExamplePlugin/"

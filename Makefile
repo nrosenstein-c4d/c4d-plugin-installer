@@ -50,7 +50,7 @@ QTUI_LIBS = $(patsubst ui/%.ui,c4dinstaller/ui/%.py,$(wildcard ui/*.ui))
 c4dinstaller/ui/%.py: ui/%.ui
 	$(PYUIC5) $< -o $@
 
-run: $(QTUI_LIBS)
+run-installer: $(QTUI_LIBS)
 	PYTHONPATH="$(PYTHONPATH)" $(PYTHON) "bootstrapper.py"
 
 run-uninstaller: $(QTUI_LIBS)
@@ -59,6 +59,11 @@ run-uninstaller: $(QTUI_LIBS)
 installer: bootstrapper.py bootstrapper.spec bootstrapper.exe.manifest $(QTUI_LIBS)
 	PYTHONPATH="$(PYTHONPATH)" $(PYINSTALLER) bootstrapper.spec -y -m bootstrapper.exe.manifest --uac-admin --onefile \
 		--workpath "$(BUILD_DIR)/temp" --distpath "$(BUILD_DIR)/dist"
+
+uninstaller: bootstrapper.py bootstrapper.spec bootstrapper.exe.manifest $(QTUI_LIBS)
+	PYTHONPATH="$(PYTHONPATH)" UNINSTALLER=true $(PYINSTALLER) bootstrapper.spec -y -m bootstrapper.exe.manifest --uac-admin --onefile \
+		--workpath "$(BUILD_DIR)/temp" --distpath "$(BUILD_DIR)/dist"
+	$(PYTHON) ".scripts/copy-uninstaller.py"
 
 clean-qtui:
 	rm -f $(QTUI_LIBS)

@@ -30,8 +30,10 @@ import os
 
 if sys.platform.startswith('win'):
   PLATFORM = 'windows'
+  APP_SUFFIX = '.exe'
 elif sys.platform.startswith('mac'):
   PLATFORM = 'osx'
+  APP_SUFFIX = '.app'
 else:
   raise EnvironmentError('unsupported platform: {}'.format(sys.platform))
 
@@ -274,9 +276,17 @@ class InstallPage(_FormPage('page05install')):
       dep = InstallDependency(name, cmd, ret)
       dependencies.append(dep)
 
-    installedFilesListFn = render(self.config('install.filelist') or '')
-    slowdownProgress = self.config('install.slowdown')
+    if self.config('uninstaller.enabled'):
+      targetDir = render(self.config('uninstaller.target_directory') or '')
+      uninstallerName = self.config('uninstaller.name') + APP_SUFFIX
+      sourceFile = os.path.abspath(os.path.join('data/uninstaller/', uninstallerName))
+      destFile = os.path.abspath(os.path.join(targetDir, uninstallerName))
+      copyfiles.append((sourceFile, destFile))  # TODO: Uninstaller is a directory on OSX?
+      installedFilesListFn = os.path.join(targetDir, uninstallerName + '.data')
+    else:
+      installedFileListFn = None
 
+    slowdownProgress = self.config('install.slowdown')
     self.installLog = io.StringIO()
     self.installThread = InstallThread(copyfiles, dependencies, installedFilesListFn, slowdownProgress)
     self.installThread.logUpdate.connect(self.on_logUpdate, Qt.QueuedConnection)
@@ -477,7 +487,10 @@ class Installer(BaseInstaller):
 
 
 class Uninstaller(BaseInstaller):
-  pass
+
+  def initForm(self):
+
+    super().initForm()
 
 
 def read_config():
@@ -494,7 +507,7 @@ def read_strings(lang_code='en'):
 
 def main():
   app = QApplication(sys.argv)
-  if os.getenv('C4DINSTALLER_UNINSTALLER', '') == 'true':
+  if os.getenv('UNINSTALLER', '') == 'true':
     wnd_class = Uninstaller
   else:
     wnd_class = Installer

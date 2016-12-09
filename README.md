@@ -18,6 +18,13 @@ Check out the [Milestones] page for what's still to do.
 
 [Milestones]: https://github.com/nr-plugins/installer/milestones
 
+## Features
+
+- Very customisable
+- Finds available Cinema 4D installations
+- Undo's changes on installation errors
+- Option to install an uninstaller
+
 ## Requirements
 
 - CPython 3.3 or 3.4 (3.5 not supported by PyInstaller)
@@ -114,7 +121,6 @@ installation path (that is usually the Cinema 4D root directory).
 ```json
   "install": {
     "slowdown": 0.5,
-    "filelist": "$c4d/plugins/C4DInstaller_ExamplePlugin/installed-files.txt",
     "copyfiles": {
       "plugin": {
         "$src/plugin/": "$c4d/plugins/C4DInstaller_ExamplePlugin/"
@@ -130,11 +136,6 @@ installation path (that is usually the Cinema 4D root directory).
     ]
   }
 ```
-
-The `"filelist"` is the file that will be created after all files
-have been copied. This file lists up all files and directories that have been
-created by the installer. Directories are listed at the end of the file in the
-order they can be removed from the bottom up.
 
 For testing purposes, you may choose a number in seconds for `"slowdown"`.
 This is the time that will be waited after each update to the installation
@@ -164,6 +165,25 @@ supported in the `"name"`, `"file"` and `"args"` fields. The fields
     ]
 ```
 
+#### Uninstaller
+
+The default configuration for the uninstaller is this:
+
+```json
+  "uninstaller": {
+    "enabled": true,
+    "target_directory": "$c4d/plugins/C4DInstaller_ExamplePlugin/",
+    "name": "uninstall",
+    "bundle_identifier": "com.niklasrosenstein.c4dinstaller_uninstaller"
+  },
+```
+
+You can choose to disable the uninstaller. The uninstaller will be placed
+into the directory you specify with `"target_directory"`. In the same directory
+a file will be created called `${name}.data` which contains all the names of
+the files that have been installed, so that the installer knows what to
+uninstall.
+
 #### EULA
 
 The EULA can be in [data/eula.txt] and should be updated before building the
@@ -188,9 +208,10 @@ To summarise, these are the steps to configure the installer:
 
 ## Testing
 
-In order to run the installer for testing purposes, use
+In order to run the installer or uninstaller for testing purposes, use
 
-    make run
+    make run-installer
+    make run-uninstaller
 
 The Makefile supports a `PYTHON` environment version, so if `python` is not
 the program where all of the dependencies are installed, you should use this
@@ -199,12 +220,15 @@ variable to point to the correct program, eg. `PYTHON=py -3.4` or
 
 ## Building the Installer
 
+It is important to build the uninstaller *before* the installer.
+
+    make uninstaller
     make installer
 
 ## Installer admin privileges
 
 On Windows, the installer is built with UAC enabled. Note that there is
-currently nothing implemented to have `make run` run as administrator
+currently nothing implemented to have `make run-installer` run as administrator.
 
 On Mac OS, the `/usr/bin/osascript` workaround is used to ask the user for
 elevated privileges and then execute the installer in that environment.
