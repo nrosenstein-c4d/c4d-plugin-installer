@@ -16,6 +16,7 @@
 
 from .utils import fatal
 from .base import FormPage, BaseInstaller
+from .installthread import UninstallThread
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
@@ -35,16 +36,24 @@ class UninstallPage(FormPage('upage01uninstall')):
   def initForm(self):
     self.initButtonBox()
     dataFile = self.installer.dataFile
+    self.uninstallThread = UninstallThread(dataFile)
+    self.uninstallThread.progressUpdate.connect(self.on_progressUpdate, Qt.QueuedConnection)
+    self.becomesVisible.connect(self.on_becomesVisible)
+    self.buttonClose.setEnabled(False)
+    self.progressBar.setValue(0)
+
     if not dataFile:
       self.label.setText('devnote: Not in a frozen environment, no uninstall file found')
     else:
       self.label.setText(self.ls('uninstall.processing'))
-    self.progressBar.setValue(0)
-    self.becomesVisible.connect(self.on_becomesVisible)
 
   def on_becomesVisible(self):
-    # TODO: Uninstall logic
-    pass
+    self.uninstallThread.start()
+
+  def on_progressUpdate(self, progress, done):
+    self.progressBar.setValue(progress * 100)
+    if done:
+      self.buttonClose.setEnabled(True)
 
 
 class Uninstaller(BaseInstaller):

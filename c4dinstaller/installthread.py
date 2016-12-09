@@ -197,14 +197,7 @@ class InstallThread(QObject):
       for i, path in enumerate(pathsToRemove):
         self._updateProgress(Mode.Undo, 1.0 - i / len(pathsToRemove))
         try:
-          # Directories are listed at the end, so if they are empty
-          # we can safely remove them!
-          # note: safeguard if rmdir() on any platform would remove a
-          #       directory recursively
-          if os.path.isdir(path) and not os.listdir(path):
-            os.rmdir(path)
-          else:
-            os.remove(path)
+          remove_path(path)
         except OSError as exc:
           self._log('Error: Could not remove: {}'.format(path))
         else:
@@ -262,6 +255,59 @@ class InstallThread(QObject):
     return self._installedFiles
 
 
+class UninstallThread(QObject):
+
+  progressUpdate = pyqtSignal(float, bool)
+
+  def __init__(self, dataFile):
+    super().__init__()
+    self._dataFile = dataFile
+    self._thread = None
+    self._running = False
+    self._lock = threading.Lock()
+    self._error = None
+
+  def running(self):
+    with self._lock:
+      return self._running
+
+  def start(self):
+    with self._lock:
+      if self._running:
+        raise RuntimeError("already running")
+      if self._thread:
+        raise RuntimeError("can not be restarted")
+      self._thread = threading.Thread(target=self._run)
+      self._thread.start()
+
+  def _runInternal(self):
+    if not self._dataFile:
+      # Fake the uninstallation process
+      for i in range(10):
+        self.progressUpdate.emit(i / 10, False)
+        time.sleep(0.5)
+    else:
+      with open(self._dataFile) as fp:
+        files = fp.readlines()
+      for i, filename in enumerate(files):
+        self.progressUpdate.emit(0.0, False)
+        try:
+          remove_path(filename.rstrip('\n'))
+        except OSError as exc:
+          print('Error: Could not remove:', exc)
+
+  def _run(self):
+    try:
+      self._runInternal()
+    except BaseException as exc:
+      traceback.print_exc()
+      with self._lock:
+        self._error = exc
+        self._running = False
+    finally:
+      self.progressUpdate.emit(1.0, True)
+
+
 def get_filelist(from_, to):
   """
   Given two paths *from_* and *to*, returns a generator that yields absolute
@@ -286,3 +332,16 @@ def get_filelist(from_, to):
       yield from get_filelist(os.path.join(from_, filename), os.path.join(to, filename))
   else:
     raise FileNotFoundError(from_)
+
+
+def remove_path(path):
+  """
+  Removes a file or directory. Raises an error if its a directory that is
+  not empty.
+  """
+
+  if os.path.isdir(path) and not os.listdir(path):
+    os.rmdir(path)
+  else:
+    os.remove(path)
+
