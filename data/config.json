@@ -1,6 +1,6 @@
 {
   "installer": {
-    "name": "VrayBridgeInstaller",
+    "name": "VrayBridge_R16_V3_161212",
     "bundle_identifier": "com.laublab.vraybridgeinstaller"
   },
   "uninstaller": {
