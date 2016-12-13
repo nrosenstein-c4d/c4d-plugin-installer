@@ -27,6 +27,16 @@ import os
 import string
 
 
+def startfile(x):
+  x = os.path.abspath(x)
+  if hasattr(os, 'startfile'):
+    os.startfile(x)
+  elif PLATFORM == 'osx':
+    subprocess.call(['open', x])
+  else:
+    print("error: can't start file \"{}\"".format(x))
+
+
 class AboutPage(FormPage('page00about')):
 
   def initForm(self):
@@ -258,6 +268,7 @@ class InstallPage(FormPage('page05install')):
     elif mode == Mode.Cancelled:
       self.label.setText(self.ls('install.cancelled'))
     elif mode == Mode.Error:
+      QMessageBox.critical(self, 'Error', str(self.installThread.error()))
       self.label.setText(self.ls('install.error'))
       self.textView.setVisible(True)
 
@@ -271,7 +282,10 @@ class EndPage(FormPage('page06end')):
 
   def initForm(self):
     self.initButtonBox()
+    self.readmeCheckbox.setText(self.ls('end.openreadme'))
+    self.readmeCheckbox.setVisible(self.config('readme.enabled'))
     self.becomesVisible.connect(self.on_becomesVisible)
+    self.buttonClose.clicked.connect(self.on_close)
 
   def on_becomesVisible(self):
     installThread = self.installer.installPage.installThread
@@ -283,6 +297,13 @@ class EndPage(FormPage('page06end')):
       text = self.ls('end.success')
     self.label.setText(text)
 
+  def on_close(self):
+    if self.readmeCheckbox.isChecked():
+      filename = self.config('readme.file')
+      if filename and os.path.isfile(filename):
+        startfile(filename)
+      else:
+        QMessageBox.error(self, 'Error', '"{}" could not be found'.format(filename))
 
 
 class Installer(BaseInstaller):

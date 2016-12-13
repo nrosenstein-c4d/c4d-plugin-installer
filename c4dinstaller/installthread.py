@@ -99,6 +99,7 @@ class InstallThread(QObject):
     self._installedFiles = None
     self._createdDirs = None
     self._slowdownProgress = slowdownProgress
+    self._error = None
 
   def _log(self, *objects, sep=' ', end='\n'):
     message = sep.join(map(str, objects)) + end
@@ -186,8 +187,11 @@ class InstallThread(QObject):
         # Controlled abortion
         pass
       elif isinstance(exc, FileNotFoundError):
+        # TODO: Lock
+        self._error = exc
         self._log('Error: file could not be found:', exc)
       else:
+        self._error = exc
         self._log('Error:', exc)
 
       # Try to undo all installed files and created directories.
@@ -253,6 +257,10 @@ class InstallThread(QObject):
   def installedFiles(self):
     " Only access while installer is NOT running. "
     return self._installedFiles
+
+  def error(self):
+    with self._lock:
+      return self._error
 
 
 class UninstallThread(QObject):
