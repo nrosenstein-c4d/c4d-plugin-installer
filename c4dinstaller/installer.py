@@ -192,7 +192,8 @@ class InstallPage(FormPage('page05install')):
       return
 
     # Expand variables in the copyfiles list.
-    vars = {'c4d': targetPath, 'src': os.path.abspath('data/install')}
+    vars = {'c4d': targetPath, 'src': os.path.abspath('data/install'),
+            'systemappdir': 'C:\\Program Files' if PLATFORM == 'windows' else '/Applications'}
     def render(x): return string.Template(x).substitute(**vars)
 
     copyfiles = []

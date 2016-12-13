@@ -115,9 +115,15 @@ directory. By default, there's a sample Python plugin, a material preview
 preset and a plugin documentation file (respective to the default features).
 
 The `"install"` section lists which files or directoriees are to be copied
-where in the Cinema 4D application directory. The variables `$src` and `$c4d`
-are available respectively to reference the [data/install] directory and the
-installation path (that is usually the Cinema 4D root directory).
+where in the Cinema 4D application directory. Available variables:
+
+- `$src` for the [data/install] directory
+- `$c4d` for the C4D target installation directory (note that theoretically
+  this could also be an arbitrary directory, depending on what the user
+  chose as target installation path)
+- `$systemappdir` for the system application folder, this is either `C:\Program Files`
+  on Windows or `/Applications` on Mac OS. Some plugins might need to install
+  stuff there.
 
 ```json
   "install": {
