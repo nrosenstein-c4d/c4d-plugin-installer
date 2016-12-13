@@ -87,6 +87,15 @@ colors of window components as RGB values.
   }
 ```
 
+#### Readme after Installation
+
+```json
+  "readme": {
+    "enabled": true,
+    "file": "data/readme.pdf"
+  }
+```
+
 #### Feature Configuration
 
 Note that these variables are also supported in the `"features"` object

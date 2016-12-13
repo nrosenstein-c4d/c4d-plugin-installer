@@ -9,6 +9,10 @@
     "name": "uninstall",
     "bundle_identifier": "com.niklasrosenstein.c4dinstaller_uninstaller"
   },
+  "readme": {
+    "enabled": true,
+    "file": "data/readme.pdf"
+  },
   "palette": {
     "background": [40, 40, 40],
     "foreground": [200, 200, 200],
