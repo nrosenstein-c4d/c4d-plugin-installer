@@ -1,7 +1,7 @@
 {
   "__vars__": {
     "plugin": "V-Ray For Cinema 4D",
-    "documentation": "Documentation",
+    "cgbins": "ChaosGroup Binaries",
     "presets": "Preset Files"
   },
   "button.about": "About",

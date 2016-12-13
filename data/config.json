@@ -5,7 +5,7 @@
   },
   "uninstaller": {
     "enabled": true,
-    "target_directory": "$c4d/plugins/C4DInstaller_ExamplePlugin/",
+    "target_directory": "$c4d/plugins/VrayBridge_R16_V3_161212/",
     "name": "uninstall",
     "bundle_identifier": "com.niklasrosenstein.c4dinstaller_uninstaller"
   },
@@ -24,17 +24,18 @@
   },
   "features": {
     "!plugin": "$plugin",
-    "docs": "$documentation",
+    "cgbins": "$cgbins",
     "presets": "$presets"
   },
   "install": {
-    "slowdown": 0.5,
+    "slowdown": null,
     "copyfiles": {
       "plugin": {
-        "$src/plugin/": "$c4d/plugins/VrayForC4D/"
+        "$src/plugin/": "$c4d/plugins/VrayBridge_R16_V3_161212/",
+        "$src/dlls/": "$c4d"
       },
-      "docs": {
-        "$src/doc/": "$c4d/plugins/VrayForC4D/doc/"
+      "cgbins": {
+        "$src/cgbins": "$systemappdir"
       },
       "presets": {
         "$src/library/": "$c4d/library/"
